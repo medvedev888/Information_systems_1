@@ -1,7 +1,8 @@
 <script setup>
 const props = defineProps({
-  text: { type: String, default: "Enter text" },
-  modelValue: { type: String, default: "" }
+  text: {type: String, default: "Enter text"},
+  modelValue: {type: String, default: ""},
+  type: {type: String, default: "text"}
 })
 
 const emit = defineEmits(["update:modelValue"])
@@ -9,7 +10,7 @@ const emit = defineEmits(["update:modelValue"])
 
 <template>
   <input
-    type="text"
+    :type="props.type"
     class="input"
     :placeholder="text"
     :value="props.modelValue"

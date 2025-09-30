@@ -1,12 +1,46 @@
 <script setup>
+import Input from "@/components/input.vue"
+import Button from "@/components/button.vue"
+import {reactive} from 'vue'
 
+
+const props = defineProps({
+  fields: {
+    type: Array,
+    default: () => []
+  },
+  buttonLabel: {
+    type: String,
+    default: 'Submit'
+  }
+})
+
+const emit = defineEmits(['submit'])
+
+const formData = reactive({})
+props.fields.forEach(field => formData[field.modelKey] = '')
+
+
+function handleSubmit(e) {
+  e.preventDefault()
+  emit('submit', {...formData})
+}
 </script>
 
 <template>
-  <form class="form">
-    <input type="text" class="input" placeholder="Name">
-    <input type="email" class="input" placeholder="Email">
-    <button class="btn" type="submit">Submit</button>
+  <form class="form" @submit="handleSubmit">
+    <Input
+      v-for="field in fields"
+      :key="field.modelKey"
+      v-model="formData[field.modelKey]"
+      :text="field.text"
+      :type="field.type || 'text'"
+    />
+
+    <Button
+      :label="buttonLabel"
+      type="submit"
+    />
   </form>
 </template>
 
