@@ -8,6 +8,7 @@ import me.vladislav.information_systems_1.exception.UserAlreadyExistException;
 import me.vladislav.information_systems_1.exception.UserNotFoundException;
 import me.vladislav.information_systems_1.model.User;
 import me.vladislav.information_systems_1.repository.UserRepository;
+import me.vladislav.information_systems_1.utils.PasswordUtil;
 
 @ApplicationScoped
 public class UserService {
@@ -16,26 +17,26 @@ public class UserService {
     private UserRepository userRepository;
 
     @Transactional
-    public void registerNewUserAccount(UserDTO dto) {
+    public UserDTO registerNewUserAccount(UserDTO dto) {
         if (userRepository.getByLogin(dto.getLogin()).isPresent()) {
             throw new UserAlreadyExistException("Пользователь с логином \"" + dto.getLogin() + "\" уже существует");
         }
-
         User user = new User();
         user.setLogin(dto.getLogin());
-        user.setPassword(dto.getPassword());
+        user.setPassword(PasswordUtil.hashPassword(dto.getPassword()));
 
         userRepository.save(user);
-        dto.setId(user.getId());
+        return new UserDTO(user.getId(), user.getLogin(), null);
     }
 
-    public User getUserByLogin(String login) {
-        return userRepository.getByLogin(login)
+    public UserDTO getUserByLogin(String login) {
+        User user = userRepository.getByLogin(login)
                 .orElseThrow(() -> new UserNotFoundException("Пользователь с логином \"" + login + "\" не найден"));
+        return new UserDTO(user.getId(), user.getLogin(), user.getPassword());
     }
 
-    public boolean checkPassword(String login, String password) {
-        User user = getUserByLogin(login);
-        return user.getPassword().equals(password);
+    public boolean confirmUserPassword(String password, String hashedPassword) {
+        return PasswordUtil.checkPassword(password, hashedPassword);
     }
+
 }
