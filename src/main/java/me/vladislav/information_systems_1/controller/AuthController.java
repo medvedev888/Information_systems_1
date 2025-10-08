@@ -12,7 +12,9 @@ import me.vladislav.information_systems_1.dto.AuthRequest;
 import me.vladislav.information_systems_1.dto.AuthResponse;
 import me.vladislav.information_systems_1.dto.UserDTO;
 import me.vladislav.information_systems_1.exception.UserAlreadyExistException;
+import me.vladislav.information_systems_1.exception.UserNotFoundException;
 import me.vladislav.information_systems_1.service.UserService;
+import me.vladislav.information_systems_1.utils.JwtUtil;
 
 import java.util.Map;
 
@@ -32,11 +34,14 @@ public class AuthController {
             userDTO.setLogin(request.getLogin());
             userDTO.setPassword(request.getPassword());
 
-            userService.registerNewUserAccount(userDTO);
+            UserDTO savedUserDTO = userService.registerNewUserAccount(userDTO);
 
-            AuthResponse response = new AuthResponse("123", new UserDTO(userDTO.getId(), userDTO.getLogin(), null));
-            return Response.status(Response.Status.CREATED).entity(response).build();
-
+            String token = JwtUtil.generateToken(savedUserDTO.getLogin());
+            AuthResponse response = new AuthResponse(token, new UserDTO(savedUserDTO.getId(), savedUserDTO.getLogin(), savedUserDTO.getPassword()));
+            return Response.status(Response.Status.CREATED)
+                    .header("Authorization", "Bearer " + token)
+                    .entity(response)
+                    .build();
         } catch (UserAlreadyExistException e) {
             return Response.status(Response.Status.CONFLICT)
                     .entity(Map.of("success", false, "message", e.getMessage()))
@@ -49,9 +54,30 @@ public class AuthController {
     }
 
     @POST
-    @Path(("/login"))
-    public AuthResponse login(AuthRequest request) {
-
-        return new AuthResponse();
+    @Path("/login")
+    public Response login(AuthRequest request) {
+        try {
+            UserDTO userDTO = userService.getUserByLogin(request.getLogin());
+            if (userService.confirmUserPassword(request.getPassword(), userDTO.getPassword())) {
+                String token = JwtUtil.generateToken(userDTO.getLogin());
+                AuthResponse response = new AuthResponse(token, new UserDTO(userDTO.getId(), userDTO.getLogin(), null));
+                return Response.ok()
+                        .header("Authorization", "Bearer " + token)
+                        .entity(response)
+                        .build();
+            } else {
+                return Response.status(Response.Status.UNAUTHORIZED)
+                        .entity(Map.of("success", false, "message", "Invalid login or password"))
+                        .build();
+            }
+        } catch (UserNotFoundException e) {
+            return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity(Map.of("success", false, "message", e.getMessage()))
+                    .build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(Map.of("success", false, "message", "Unexpected error"))
+                    .build();
+        }
     }
 }
