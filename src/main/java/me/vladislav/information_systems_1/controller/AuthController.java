@@ -2,6 +2,7 @@ package me.vladislav.information_systems_1.controller;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -28,7 +29,7 @@ public class AuthController {
 
     @POST
     @Path("/register")
-    public Response register(AuthRequest request) {
+    public Response register(@Valid AuthRequest request) {
         try {
             UserDTO userDTO = new UserDTO();
             userDTO.setLogin(request.getLogin());
@@ -55,7 +56,7 @@ public class AuthController {
 
     @POST
     @Path("/login")
-    public Response login(AuthRequest request) {
+    public Response login(@Valid AuthRequest request) {
         try {
             UserDTO userDTO = userService.getUserByLogin(request.getLogin());
             if (userService.confirmUserPassword(request.getPassword(), userDTO.getPassword())) {
