@@ -38,7 +38,7 @@ async function handleRegister(data) {
   Object.assign(formData, data);
   if (!checkPasswords()) return;
 
-  const result = await authRequest("registration", formData.login, formData.password);
+  const result = await authRequest("register", formData.login, formData.password);
 
   if (result.success) {
     await router.push("/");
