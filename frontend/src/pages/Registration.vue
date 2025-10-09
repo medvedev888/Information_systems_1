@@ -38,7 +38,7 @@ async function handleRegister(data) {
   Object.assign(formData, data);
   if (!checkPasswords()) return;
 
-  const result = await authRequest("register", formData.login, formData.password);
+  const result = await authRequest("registration", formData.login, formData.password);
 
   if (result.success) {
     await router.push("/");
@@ -51,7 +51,7 @@ async function handleRegister(data) {
 
 <template>
   <div class="container">
-    <h1>Register Page</h1>
+    <h1>Registration Page</h1>
     <Form
       :fields="[
         { modelKey: 'login', text: 'Enter login', type: 'text' },
