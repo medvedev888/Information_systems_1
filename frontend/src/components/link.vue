@@ -1,7 +1,7 @@
 <script setup>
 defineProps({
-  label: { type: String, default: "Go to link" },
-  href: { type: String, default: "#" }
+  label: {type: String, default: "Go to link"},
+  href: {type: String, default: "#"}
 })
 defineEmits(["click"])
 </script>
@@ -18,11 +18,10 @@ defineEmits(["click"])
 
 <style scoped>
 .link {
-
+  text-decoration: underline;
   display: inline-block;
   padding: 0;
   color: black;
-  text-decoration: none;
   border-radius: 0.375rem;
   cursor: pointer;
   font-weight: 300;

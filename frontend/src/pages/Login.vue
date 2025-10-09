@@ -1,12 +1,41 @@
 <script setup>
 import Form from "@/components/form.vue"
 import {reactive} from "vue";
+import router from "@/router/index.js";
+import Link from "@/components/link.vue";
 
 const formData = reactive({login: "", password: ""});
 
-function handleLogin(data) {
+async function authRequest(endpoint, login, password) {
+  try {
+    const res = await fetch(`http://localhost:8080/Lab_1-1.0-SNAPSHOT/api/auth/${endpoint}`, {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({login, password})
+    });
+    const data = await res.json();
+
+    if (res.ok) {
+      localStorage.setItem("jwt", data.token);
+      return {success: true};
+    } else {
+      return {success: false, errors: data.errors || {general: data.message}};
+    }
+  } catch (err) {
+    return {success: false, errors: {general: "Network error"}};
+  }
+}
+
+async function handleLogin(data) {
   Object.assign(formData, data);
-  // отправка на сервер
+
+  const result = await authRequest("login", formData.login, formData.password);
+
+  if (result.success) {
+    await router.push("/");
+  } else {
+    alert(Object.values(result.errors).join("\n"));
+  }
 }
 </script>
 
@@ -22,6 +51,13 @@ function handleLogin(data) {
       buttonLabel="Login"
       @submit="handleLogin"
     />
+    <div class="container2">
+      <h4>If you don’t have an account:</h4>
+      <Link
+        label="Register"
+        href="/registration">
+      </Link>
+    </div>
   </div>
 </template>
 
@@ -34,5 +70,17 @@ function handleLogin(data) {
   justify-content: center;
   min-height: 100vh;
   gap: 1rem;
+}
+
+.container2 {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1rem;
+}
+
+h1, h4 {
+  margin: 0;
+  font-weight: 300;
 }
 </style>
