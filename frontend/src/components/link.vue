@@ -29,6 +29,6 @@ defineEmits(["click"])
 }
 
 .link:hover {
-  color: rgba(79, 70, 229, 0.3);
+  color: rgba(79, 70, 229, 0.8);
 }
 </style>

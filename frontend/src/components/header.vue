@@ -14,6 +14,7 @@ function logout() {
 }
 </script>
 
+
 <template>
   <header class="app-header">
     <div class="left header-block">
