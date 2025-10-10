@@ -55,7 +55,7 @@ function logout() {
   justify-content: space-between;
   align-items: center;
   padding: 0.5rem 4rem;
-  border: 1px solid black;
+  border-bottom: 1px solid black;
 }
 
 .left, .center, .right {
