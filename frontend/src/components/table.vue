@@ -11,7 +11,7 @@ const emit = defineEmits(["rowClick"]);
 <template>
   <table class="table">
     <thead>
-    <tr>
+    <tr class="header-row">
       <th v-for="col in columns" :key="col.key">{{ col.label }}</th>
     </tr>
     </thead>
@@ -41,5 +41,10 @@ th, td {
 tr:hover {
   background: rgba(79, 70, 229, 0.3);
   cursor: pointer;
+}
+
+.header-row th {
+  border-collapse: collapse;
+  border-bottom: 1px solid black;
 }
 </style>
