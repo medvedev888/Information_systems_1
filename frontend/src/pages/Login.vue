@@ -17,6 +17,7 @@ async function authRequest(endpoint, login, password) {
 
     if (res.ok) {
       localStorage.setItem("jwt", data.token);
+      localStorage.setItem("userLogin", data.userDTO.login);
       return {success: true};
     } else {
       return {success: false, errors: data.errors || {general: data.message}};
