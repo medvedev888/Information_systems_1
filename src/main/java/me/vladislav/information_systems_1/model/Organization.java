@@ -21,14 +21,14 @@ public class Organization {
     private String name;
 
     @OneToOne
-    @Column(nullable = false)
+    @org.hibernate.annotations.Check(constraints = "coordinates IS NOT NULL")
     private Coordinates coordinates;
 
     @Column(nullable = false)
     private Date creationDate;
 
     @OneToOne
-    @Column(nullable = false)
+    @org.hibernate.annotations.Check(constraints = "official_address IS NOT NULL")
     private Address officialAddress;
 
     @Column
