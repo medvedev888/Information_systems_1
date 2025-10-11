@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Check;
 
 @Entity
 @Table(name = "coordinates")
@@ -16,10 +15,10 @@ public class Coordinates {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private Float x;
 
-    @Column(nullable = false)
-    @Check(constraints = "y > -646")
+    @Column(name = "y", nullable = false)
+    @org.hibernate.annotations.Check(constraints = "y > -646")
     private Integer y;
 }

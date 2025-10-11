@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import java.util.Date;
 
 @Entity
-@Table(name = "coordinates")
+@Table(name = "organizations")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -21,25 +21,25 @@ public class Organization {
     private String name;
 
     @OneToOne
-    @org.hibernate.annotations.Check(constraints = "coordinates IS NOT NULL")
+    @JoinColumn(name = "coordinates_id", nullable = false)
     private Coordinates coordinates;
 
     @Column(nullable = false)
     private Date creationDate;
 
     @OneToOne
-    @org.hibernate.annotations.Check(constraints = "official_address IS NOT NULL")
+    @JoinColumn(name = "official_address_id", nullable = false)
     private Address officialAddress;
 
-    @Column
+    @Column(name = "annual_turnover")
     @org.hibernate.annotations.Check(constraints = "annual_turnover IS NULL OR annual_turnover > 0")
     private Double annualTurnover;
 
-    @Column
+    @Column(name = "employees_count")
     @org.hibernate.annotations.Check(constraints = "employees_count > 0")
     private Integer employeesCount;
 
-    @Column(nullable = false)
+    @Column(name="rating", nullable = false)
     @org.hibernate.annotations.Check(constraints = "rating > 0")
     private Double rating;
 
@@ -51,6 +51,7 @@ public class Organization {
     private OrganizationType type;
 
     @OneToOne
+    @JoinColumn(name = "postal_address_id")
     private Address postalAddress;
 
     @PrePersist
