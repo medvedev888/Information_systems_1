@@ -10,7 +10,6 @@ import me.vladislav.information_systems_1.model.Location;
 import me.vladislav.information_systems_1.repository.LocationRepository;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class LocationService {
@@ -26,7 +25,7 @@ public class LocationService {
         List<Location> locations = locationRepository.getPage(page, size);
         return locations.stream()
                 .map(locationMapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Transactional

@@ -10,7 +10,6 @@ import me.vladislav.information_systems_1.model.Coordinates;
 import me.vladislav.information_systems_1.repository.CoordinatesRepository;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class CoordinatesService {
@@ -25,7 +24,7 @@ public class CoordinatesService {
         List<Coordinates> coordinatesList = coordinatesRepository.getPage(page, size);
         return coordinatesList.stream()
                 .map(coordinatesMapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Transactional

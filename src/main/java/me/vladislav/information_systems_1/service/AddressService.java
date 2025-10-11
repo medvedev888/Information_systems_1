@@ -13,7 +13,6 @@ import me.vladislav.information_systems_1.repository.AddressRepository;
 import me.vladislav.information_systems_1.repository.LocationRepository;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class AddressService {
@@ -31,7 +30,7 @@ public class AddressService {
         List<Address> addresses = addressRepository.getPage(page, size);
         return addresses.stream()
                 .map(addressMapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Transactional
@@ -68,6 +67,7 @@ public class AddressService {
             address.setTown(town);
         }
     }
+
 
     @Transactional
     public void delete(Long id) {
