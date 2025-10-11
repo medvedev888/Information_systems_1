@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CoordinatesDTO {
+    private Long id;
+
     @NotNull(message = "X is required")
     private Float x;
 
