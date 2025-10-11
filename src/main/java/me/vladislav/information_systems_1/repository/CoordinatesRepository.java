@@ -20,11 +20,11 @@ public class CoordinatesRepository {
     }
 
     public List<Coordinates> getAll() {
-        return entityManager.createQuery("FROM Coordinates", Coordinates.class).getResultList();
+        return entityManager.createQuery("SELECT c FROM Coordinates c", Coordinates.class).getResultList();
     }
 
     public List<Coordinates> getPage(int page, int size) {
-        return entityManager.createQuery("FROM Coordinates", Coordinates.class)
+        return entityManager.createQuery("SELECT c FROM Coordinates c", Coordinates.class)
                 .setFirstResult((page - 1) * size)
                 .setMaxResults(size)
                 .getResultList();

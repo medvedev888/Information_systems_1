@@ -21,11 +21,11 @@ public class OrganizationRepository {
     }
 
     public List<Organization> getAll() {
-        return entityManager.createQuery("FROM Organization", Organization.class).getResultList();
+        return entityManager.createQuery("SELECT o FROM Organization o", Organization.class).getResultList();
     }
 
     public List<Organization> getPage(int page, int size) {
-        return entityManager.createQuery("FROM Organization", Organization.class)
+        return entityManager.createQuery("SELECT o FROM Organization o", Organization.class)
                 .setFirstResult((page - 1) * size)
                 .setMaxResults(size)
                 .getResultList();

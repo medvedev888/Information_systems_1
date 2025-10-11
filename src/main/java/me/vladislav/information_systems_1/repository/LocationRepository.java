@@ -20,11 +20,11 @@ public class LocationRepository {
     }
 
     public List<Location> getAll() {
-        return entityManager.createQuery("FROM Location", Location.class).getResultList();
+        return entityManager.createQuery("SELECT l FROM Location l", Location.class).getResultList();
     }
 
     public List<Location> getPage(int page, int size) {
-        return entityManager.createQuery("FROM Location", Location.class)
+        return entityManager.createQuery("SELECT l FROM Location l", Location.class)
                 .setFirstResult((page - 1) * size)
                 .setMaxResults(size)
                 .getResultList();
