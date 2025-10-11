@@ -1,4 +1,4 @@
-package me.vladislav.information_systems_1.exception;
+package me.vladislav.information_systems_1.exception.handler;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Provider
-public class ValidationExceptionMapper implements ExceptionMapper<ConstraintViolationException> {
+public class ValidationExceptionHandler implements ExceptionMapper<ConstraintViolationException> {
 
     @Override
     public Response toResponse(ConstraintViolationException exception) {
