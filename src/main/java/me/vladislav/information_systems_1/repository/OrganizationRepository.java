@@ -16,7 +16,7 @@ public class OrganizationRepository {
     @PersistenceContext(unitName = "Lab1PU")
     private EntityManager entityManager;
 
-    public Optional<Organization> getById(Long id) {
+    public Optional<Organization> getById(Integer id) {
         return Optional.ofNullable(entityManager.find(Organization.class, id));
     }
 
