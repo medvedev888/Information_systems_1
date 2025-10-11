@@ -19,7 +19,14 @@ public class AddressRepository {
     }
 
     public List<Address> getAll() {
-        return entityManager.createQuery("FROM Address", Address.class).getResultList();
+        return entityManager.createQuery("SELECT a FROM Address a", Address.class).getResultList();
+    }
+
+    public List<Address> getPage(Integer page, Integer size) {
+        return entityManager.createQuery("SELECT a FROM Address a", Address.class)
+                .setFirstResult((page - 1) * size)
+                .setMaxResults(size)
+                .getResultList();
     }
 
     public void save(Address address) {

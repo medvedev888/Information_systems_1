@@ -4,6 +4,7 @@ package me.vladislav.information_systems_1.repository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import me.vladislav.information_systems_1.model.Location;
 import me.vladislav.information_systems_1.model.Organization;
 
 import java.util.List;
@@ -21,6 +22,13 @@ public class OrganizationRepository {
 
     public List<Organization> getAll() {
         return entityManager.createQuery("FROM Organization", Organization.class).getResultList();
+    }
+
+    public List<Organization> getPage(int page, int size) {
+        return entityManager.createQuery("FROM Organization", Organization.class)
+                .setFirstResult((page - 1) * size)
+                .setMaxResults(size)
+                .getResultList();
     }
 
     public void save(Organization organization) {
