@@ -7,11 +7,9 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import me.vladislav.information_systems_1.dto.LocationDTO;
-import me.vladislav.information_systems_1.exception.LocationNotFoundException;
 import me.vladislav.information_systems_1.service.LocationService;
 
 import java.util.List;
-import java.util.Map;
 
 @Path("/locations")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -29,46 +27,22 @@ public class LocationController {
 
     @POST
     public Response create(@Valid LocationDTO locationDTO) {
-        try {
-            locationService.save(locationDTO);
-            return Response.status(Response.Status.CREATED).build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(Map.of("success", false, "message", "Could not create location"))
-                    .build();
-        }
+        locationService.save(locationDTO);
+        return Response.status(Response.Status.CREATED).build();
+
     }
 
     @PATCH
     public Response update(@Valid LocationDTO locationDTO) {
-        try {
-            locationService.update(locationDTO);
-            return Response.noContent().build();
-        } catch (LocationNotFoundException e) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity(Map.of("success", false, "message", e.getMessage()))
-                    .build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(Map.of("success", false, "message", "Could not update location"))
-                    .build();
-        }
+        locationService.update(locationDTO);
+        return Response.noContent().build();
+
     }
 
     @DELETE
     @Path("/{id}")
     public Response delete(@PathParam("id") Long id) {
-        try {
-            locationService.delete(id);
-            return Response.noContent().build();
-        } catch (LocationNotFoundException e) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity(Map.of("success", false, "message", e.getMessage()))
-                    .build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(Map.of("success", false, "message", "Could not delete location"))
-                    .build();
-        }
+        locationService.delete(id);
+        return Response.noContent().build();
     }
 }

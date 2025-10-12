@@ -7,11 +7,9 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import me.vladislav.information_systems_1.dto.CoordinatesDTO;
-import me.vladislav.information_systems_1.exception.CoordinatesNotFoundException;
 import me.vladislav.information_systems_1.service.CoordinatesService;
 
 import java.util.List;
-import java.util.Map;
 
 @Path("/coordinates")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -29,46 +27,22 @@ public class CoordinatesController {
 
     @POST
     public Response create(@Valid CoordinatesDTO coordinatesDTO) {
-        try {
-            coordinatesService.save(coordinatesDTO);
-            return Response.status(Response.Status.CREATED).build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(Map.of("success", false, "message", "Could not create coordinates"))
-                    .build();
-        }
+        coordinatesService.save(coordinatesDTO);
+        return Response.status(Response.Status.CREATED).build();
+
     }
 
     @PATCH
     public Response update(@Valid CoordinatesDTO coordinatesDTO) {
-        try {
-            coordinatesService.update(coordinatesDTO);
-            return Response.noContent().build();
-        } catch (CoordinatesNotFoundException e) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity(Map.of("success", false, "message", e.getMessage()))
-                    .build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(Map.of("success", false, "message", "Could not update coordinates"))
-                    .build();
-        }
+        coordinatesService.update(coordinatesDTO);
+        return Response.noContent().build();
     }
 
     @DELETE
     @Path("/{id}")
     public Response delete(@PathParam("id") Long id) {
-        try {
-            coordinatesService.delete(id);
-            return Response.noContent().build();
-        } catch (CoordinatesNotFoundException e) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity(Map.of("success", false, "message", e.getMessage()))
-                    .build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(Map.of("success", false, "message", "Could not delete coordinates"))
-                    .build();
-        }
+        coordinatesService.delete(id);
+        return Response.noContent().build();
+
     }
 }
