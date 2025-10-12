@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import me.vladislav.information_systems_1.dto.AddressDTO;
+import me.vladislav.information_systems_1.dto.CoordinatesDTO;
 import me.vladislav.information_systems_1.exception.AddressNotFoundException;
 import me.vladislav.information_systems_1.exception.LocationNotFoundException;
 import me.vladislav.information_systems_1.mapper.AddressMapper;
@@ -34,7 +35,7 @@ public class AddressService {
     }
 
     @Transactional
-    public void save(AddressDTO addressDTO) {
+    public AddressDTO save(AddressDTO addressDTO) {
         Address address = new Address();
         address.setStreet(addressDTO.getStreet());
 
@@ -45,10 +46,12 @@ public class AddressService {
         }
 
         addressRepository.save(address);
+
+        return addressMapper.toDTO(address);
     }
 
     @Transactional
-    public void update(AddressDTO addressDTO) {
+    public AddressDTO update(AddressDTO addressDTO) {
         Address address = addressRepository.getById(addressDTO.getId())
                 .orElseThrow(() -> new AddressNotFoundException("Address not found"));
 
@@ -66,13 +69,19 @@ public class AddressService {
 
             address.setTown(town);
         }
+
+        return addressMapper.toDTO(address);
     }
 
 
     @Transactional
-    public void delete(Long id) {
+    public AddressDTO delete(Long id) {
         Address address = addressRepository.getById(id)
                 .orElseThrow(() -> new AddressNotFoundException("Address not found"));
         addressRepository.delete(address);
+
+        AddressDTO addressDTO = new AddressDTO();
+        addressDTO.setId(id);
+        return addressDTO;
     }
 }

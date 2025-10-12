@@ -29,7 +29,7 @@ public class LocationService {
     }
 
     @Transactional
-    public void save(LocationDTO locationDTO) {
+    public LocationDTO save(LocationDTO locationDTO) {
         Location location = new Location();
 
         location.setX(locationDTO.getX());
@@ -37,10 +37,11 @@ public class LocationService {
         location.setZ(locationDTO.getZ());
 
         locationRepository.save(location);
+        return locationMapper.toDTO(location);
     }
 
     @Transactional
-    public void update(LocationDTO locationDTO) {
+    public LocationDTO update(LocationDTO locationDTO) {
         Location location = locationRepository.getById(locationDTO.getId())
                 .orElseThrow(() -> new LocationNotFoundException("Location not found"));
 
@@ -55,12 +56,17 @@ public class LocationService {
         if (locationDTO.getZ() != null) {
             location.setZ(locationDTO.getZ());
         }
+        return locationMapper.toDTO(location);
     }
 
     @Transactional
-    public void delete(Long id) {
+    public LocationDTO delete(Long id) {
         Location location = locationRepository.getById(id)
                 .orElseThrow(() -> new LocationNotFoundException("Location not found"));
         locationRepository.delete(location);
+
+        LocationDTO locationDTO = new LocationDTO();
+        locationDTO.setId(id);
+        return locationDTO;
     }
 }
