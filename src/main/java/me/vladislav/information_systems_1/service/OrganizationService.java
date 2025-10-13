@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import me.vladislav.information_systems_1.dto.OrganizationDTO;
+import me.vladislav.information_systems_1.dto.PageResponse;
 import me.vladislav.information_systems_1.exception.AddressNotFoundException;
 import me.vladislav.information_systems_1.exception.CoordinatesNotFoundException;
 import me.vladislav.information_systems_1.exception.OrganizationNotFoundException;
@@ -33,11 +34,13 @@ public class OrganizationService {
     private OrganizationMapper organizationMapper;
 
     @Transactional
-    public List<OrganizationDTO> getPage(Integer page, Integer size) {
-        List<Organization> organizations = organizationRepository.getPage(page, size);
-        return organizations.stream()
+    public PageResponse<OrganizationDTO> getPage(Integer page, Integer size) {
+        List<OrganizationDTO> organizations = organizationRepository.getPage(page, size).stream()
                 .map(organizationMapper::toDTO)
                 .toList();
+        long totalCount = organizationRepository.count();
+        Integer totalPages = (int) Math.ceil((double) totalCount / size);
+        return new PageResponse<>(organizations, totalPages);
     }
 
     @Transactional

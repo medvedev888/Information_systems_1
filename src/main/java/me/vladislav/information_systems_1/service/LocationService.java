@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import me.vladislav.information_systems_1.dto.LocationDTO;
+import me.vladislav.information_systems_1.dto.PageResponse;
 import me.vladislav.information_systems_1.exception.LocationNotFoundException;
 import me.vladislav.information_systems_1.mapper.LocationMapper;
 import me.vladislav.information_systems_1.model.Location;
@@ -21,11 +22,13 @@ public class LocationService {
     private LocationMapper locationMapper;
 
     @Transactional
-    public List<LocationDTO> getPage(Integer page, Integer size) {
-        List<Location> locations = locationRepository.getPage(page, size);
-        return locations.stream()
+    public PageResponse<LocationDTO> getPage(Integer page, Integer size) {
+        List<LocationDTO> locations = locationRepository.getPage(page, size).stream()
                 .map(locationMapper::toDTO)
                 .toList();
+        long totalCount = locationRepository.count();
+        Integer totalPages = (int) Math.ceil((double) totalCount / size);
+        return new PageResponse<>(locations, totalPages);
     }
 
     @Transactional

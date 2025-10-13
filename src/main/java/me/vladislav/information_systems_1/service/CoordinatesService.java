@@ -4,7 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import me.vladislav.information_systems_1.dto.CoordinatesDTO;
-import me.vladislav.information_systems_1.dto.LocationDTO;
+import me.vladislav.information_systems_1.dto.PageResponse;
 import me.vladislav.information_systems_1.exception.CoordinatesNotFoundException;
 import me.vladislav.information_systems_1.mapper.CoordinatesMapper;
 import me.vladislav.information_systems_1.model.Coordinates;
@@ -21,11 +21,13 @@ public class CoordinatesService {
     private CoordinatesMapper coordinatesMapper;
 
     @Transactional
-    public List<CoordinatesDTO> getPage(Integer page, Integer size) {
-        List<Coordinates> coordinatesList = coordinatesRepository.getPage(page, size);
-        return coordinatesList.stream()
+    public PageResponse<CoordinatesDTO> getPage(Integer page, Integer size) {
+        List<CoordinatesDTO> coordinates = coordinatesRepository.getPage(page, size).stream()
                 .map(coordinatesMapper::toDTO)
                 .toList();
+        long totalCount = coordinatesRepository.count();
+        Integer totalPages = (int) Math.ceil((double) totalCount / size);
+        return new PageResponse<>(coordinates, totalPages);
     }
 
     @Transactional

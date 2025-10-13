@@ -4,7 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import me.vladislav.information_systems_1.dto.AddressDTO;
-import me.vladislav.information_systems_1.dto.CoordinatesDTO;
+import me.vladislav.information_systems_1.dto.PageResponse;
 import me.vladislav.information_systems_1.exception.AddressNotFoundException;
 import me.vladislav.information_systems_1.exception.LocationNotFoundException;
 import me.vladislav.information_systems_1.mapper.AddressMapper;
@@ -27,11 +27,14 @@ public class AddressService {
     private AddressMapper addressMapper;
 
     @Transactional
-    public List<AddressDTO> getPage(Integer page, Integer size) {
-        List<Address> addresses = addressRepository.getPage(page, size);
-        return addresses.stream()
+    public PageResponse<AddressDTO> getPage(Integer page, Integer size) {
+        List<AddressDTO> addresses = addressRepository.getPage(page, size).stream()
                 .map(addressMapper::toDTO)
                 .toList();
+        ;
+        long totalCount = addressRepository.count();
+        Integer totalPages = (int) Math.ceil((double) totalCount / size);
+        return new PageResponse<>(addresses, totalPages);
     }
 
     @Transactional
