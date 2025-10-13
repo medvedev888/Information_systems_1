@@ -2,13 +2,14 @@
 import Table from "@/components/table.vue";
 import Header from "@/components/header.vue";
 
-import {reactive, ref} from "vue";
+import {reactive, ref, onMounted, watch} from "vue";
 import Pagination from "@/components/pagination.vue";
 import axios from "@/axios.js";
 
 const page = ref(1);
+const totalPages = ref(1);
+const rows = reactive([]);
 
-// Определяем колонки
 const columns = [
   { key: "id", label: "ID" },
   { key: "name", label: "Name" },
@@ -20,38 +21,9 @@ const columns = [
   { key: "rating", label: "Rating" },
   { key: "fullName", label: "Full Name" },
   { key: "type", label: "Type" },
-  { key: "postalAddress", label: "Postal Address" }
+  { key: "postalAddress", label: "Postal Address" },
+  { key: "operation", label: "Operations"}
 ];
-
-// Данные для таблицы (стринги вместо объектов)
-const rows = reactive([
-  {
-    id: 1,
-    name: "Org A",
-    coordinates: "X: 10, Y: 20",
-    creationDate: "2025-10-10",
-    officialAddress: "Street 1, City A",
-    annualTurnover: "1000000",
-    employeesCount: 50,
-    rating: 4.5,
-    fullName: "Organization Alpha",
-    type: "COMMERCIAL",
-    postalAddress: "Postal Street 1"
-  },
-  {
-    id: 2,
-    name: "Org B",
-    coordinates: "X: 5, Y: 15",
-    creationDate: "2023-05-01",
-    officialAddress: "Street 2, City B",
-    annualTurnover: "500000",
-    employeesCount: 30,
-    rating: 3.8,
-    fullName: "Organization Beta",
-    type: "GOVERNMENT",
-    postalAddress: "Postal Street 2"
-  }
-]);
 
 
 function handleRowClick(row) {
@@ -72,6 +44,8 @@ async function fetchOrganizations() {
   }
 }
 
+onMounted(fetchOrganizations);
+watch(page, fetchOrganizations);
 </script>
 
 
@@ -84,7 +58,7 @@ async function fetchOrganizations() {
     </div>
       <Pagination
         v-model:pageNumber="page"
-        :totalPages="3"
+        :totalPages="totalPages"
       />
   </div>
 </template>
@@ -99,7 +73,7 @@ h2 {
 }
 
 .table-container {
-  padding: 0 2rem;
+  padding: 0 1.5rem;
 }
 
 .container {
