@@ -7,10 +7,9 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import me.vladislav.information_systems_1.dto.CoordinatesDTO;
+import me.vladislav.information_systems_1.dto.PageResponse;
 import me.vladislav.information_systems_1.service.CoordinatesService;
 import me.vladislav.information_systems_1.service.EventService;
-
-import java.util.List;
 
 @Path("/coordinates")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -25,8 +24,8 @@ public class CoordinatesController {
 
     @GET
     public Response getPage(@QueryParam("page") Integer page, @QueryParam("size") Integer size) {
-        List<CoordinatesDTO> coordinatesList = coordinatesService.getPage(page, size);
-        return Response.ok(coordinatesList).build();
+        PageResponse<CoordinatesDTO> response = coordinatesService.getPage(page, size);
+        return Response.ok(response).build();
     }
 
     @POST

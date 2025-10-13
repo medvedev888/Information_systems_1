@@ -7,10 +7,9 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import me.vladislav.information_systems_1.dto.OrganizationDTO;
+import me.vladislav.information_systems_1.dto.PageResponse;
 import me.vladislav.information_systems_1.service.EventService;
 import me.vladislav.information_systems_1.service.OrganizationService;
-
-import java.util.List;
 
 @Path("/organizations")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -25,8 +24,8 @@ public class OrganizationController {
 
     @GET
     public Response getPage(@QueryParam("page") Integer page, @QueryParam("size") Integer size) {
-        List<OrganizationDTO> organizations = organizationService.getPage(page, size);
-        return Response.ok(organizations).build();
+        PageResponse<OrganizationDTO> response = organizationService.getPage(page, size);
+        return Response.ok(response).build();
     }
 
     @POST

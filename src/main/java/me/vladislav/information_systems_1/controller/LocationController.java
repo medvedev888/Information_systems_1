@@ -7,10 +7,9 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import me.vladislav.information_systems_1.dto.LocationDTO;
+import me.vladislav.information_systems_1.dto.PageResponse;
 import me.vladislav.information_systems_1.service.EventService;
 import me.vladislav.information_systems_1.service.LocationService;
-
-import java.util.List;
 
 @Path("/locations")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -25,8 +24,8 @@ public class LocationController {
 
     @GET
     public Response getPage(@QueryParam("page") Integer page, @QueryParam("size") Integer size) {
-        List<LocationDTO> locations = locationService.getPage(page, size);
-        return Response.ok(locations).build();
+        PageResponse<LocationDTO> response = locationService.getPage(page, size);
+        return Response.ok(response).build();
     }
 
     @POST
