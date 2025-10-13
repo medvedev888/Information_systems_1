@@ -1,11 +1,12 @@
 <script setup>
-import {defineProps, defineEmits} from "vue";
+import {defineEmits, defineProps} from "vue";
 
 const props = defineProps({
-  columns: Array, // [{ key: 'login', label: 'Login' }, ...]
-  rows: Array     // [{ login: 'Vlad', email: '...' }, ...]
+  columns: Array,
+  rows: Array
 });
 const emit = defineEmits(["rowClick"]);
+
 </script>
 
 <template>
