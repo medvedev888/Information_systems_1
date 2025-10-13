@@ -4,6 +4,7 @@ import Header from "@/components/header.vue";
 
 import {reactive, ref} from "vue";
 import Pagination from "@/components/pagination.vue";
+import axios from "@/axios.js";
 
 const page = ref(1);
 
@@ -56,6 +57,21 @@ const rows = reactive([
 function handleRowClick(row) {
   alert(`Clicked on: ${row.login}`);
 }
+
+async function fetchOrganizations() {
+  try {
+    const res = await axios.get(`/organizations?page=${page.value}&size=5`);
+    rows.splice(0, rows.length, ...res.data.data);
+    totalPages.value = res.data.totalPages;
+  } catch (err) {
+    if (err.response) {
+      console.error("Error fetching organizations:", err.response.data.message || "Unknown error");
+    } else {
+      console.error("Network error:", err);
+    }
+  }
+}
+
 </script>
 
 
