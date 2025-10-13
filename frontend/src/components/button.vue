@@ -1,13 +1,16 @@
 <script setup>
 defineProps({
-  label: { type: String, default: "Click me" }
+  label: {type: String, default: "Click me"},
+  type: {type: String, default: "button"},
+  icon: Object
 })
 defineEmits(["click"])
 </script>
 
 <template>
-  <button class="btn" @click="$emit('click')">
-    {{ label }}
+  <button :type="type" class="btn" @click="$emit('click')">
+    <component v-if="icon" :is="icon" class="btn-icon"/>
+    <span v-else-if="label">{{ label }}</span>
   </button>
 </template>
 
@@ -20,11 +23,18 @@ defineEmits(["click"])
   border-radius: 0.375rem;
   cursor: pointer;
   font-weight: 500;
-  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .btn:hover {
   background-color: #111827;
 }
-</style>
 
+.btn-icon {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+</style>
