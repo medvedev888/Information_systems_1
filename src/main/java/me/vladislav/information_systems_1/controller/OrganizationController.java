@@ -7,9 +7,9 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import me.vladislav.information_systems_1.dto.OrganizationDTO;
+import me.vladislav.information_systems_1.dto.PageResponse;
+import me.vladislav.information_systems_1.service.EventService;
 import me.vladislav.information_systems_1.service.OrganizationService;
-
-import java.util.List;
 
 @Path("/organizations")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -19,29 +19,34 @@ public class OrganizationController {
     @Inject
     private OrganizationService organizationService;
 
+    @Inject
+    private EventService eventService;
+
     @GET
     public Response getPage(@QueryParam("page") Integer page, @QueryParam("size") Integer size) {
-        List<OrganizationDTO> organizations = organizationService.getPage(page, size);
-        return Response.ok(organizations).build();
+        PageResponse<OrganizationDTO> response = organizationService.getPage(page, size);
+        return Response.ok(response).build();
     }
 
     @POST
     public Response create(@Valid OrganizationDTO organizationDTO) {
-        organizationService.save(organizationDTO);
+        OrganizationDTO organization = organizationService.save(organizationDTO);
+        eventService.sendEvent("ORGANIZATION", "CREATED", organization);
         return Response.status(Response.Status.CREATED).build();
     }
 
     @PATCH
     public Response update(@Valid OrganizationDTO organizationDTO) {
-        organizationService.update(organizationDTO);
+        OrganizationDTO organization = organizationService.update(organizationDTO);
+        eventService.sendEvent("ORGANIZATION", "UPDATED", organization);
         return Response.noContent().build();
     }
 
     @DELETE
     @Path("/{id}")
     public Response delete(@PathParam("id") Integer id) {
-        organizationService.delete(id);
+        OrganizationDTO organization = organizationService.delete(id);
+        eventService.sendEvent("ORGANIZATION", "DELETED", organization);
         return Response.noContent().build();
-
     }
 }

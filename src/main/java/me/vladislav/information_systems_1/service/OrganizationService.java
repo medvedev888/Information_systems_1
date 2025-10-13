@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import me.vladislav.information_systems_1.dto.OrganizationDTO;
+import me.vladislav.information_systems_1.dto.PageResponse;
 import me.vladislav.information_systems_1.exception.AddressNotFoundException;
 import me.vladislav.information_systems_1.exception.CoordinatesNotFoundException;
 import me.vladislav.information_systems_1.exception.OrganizationNotFoundException;
@@ -33,15 +34,17 @@ public class OrganizationService {
     private OrganizationMapper organizationMapper;
 
     @Transactional
-    public List<OrganizationDTO> getPage(Integer page, Integer size) {
-        List<Organization> organizations = organizationRepository.getPage(page, size);
-        return organizations.stream()
+    public PageResponse<OrganizationDTO> getPage(Integer page, Integer size) {
+        List<OrganizationDTO> organizations = organizationRepository.getPage(page, size).stream()
                 .map(organizationMapper::toDTO)
                 .toList();
+        long totalCount = organizationRepository.count();
+        Integer totalPages = (int) Math.ceil((double) totalCount / size);
+        return new PageResponse<>(organizations, totalPages);
     }
 
     @Transactional
-    public void save(OrganizationDTO organizationDTO) {
+    public OrganizationDTO save(OrganizationDTO organizationDTO) {
         Organization organization = new Organization();
 
         organization.setName(organizationDTO.getName());
@@ -61,26 +64,24 @@ public class OrganizationService {
         }
 
         organization.setAnnualTurnover(organizationDTO.getAnnualTurnover());
-
         organization.setEmployeesCount(organizationDTO.getEmployeesCount());
-
         organization.setRating(organizationDTO.getRating());
-
         organization.setFullName(organizationDTO.getFullName());
-
         organization.setType(organizationDTO.getType());
 
         organizationRepository.save(organization);
+
+        return organizationMapper.toDTO(organization);
     }
 
 
     @Transactional
-    public void update(OrganizationDTO organizationDTO) {
-        Organization org = organizationRepository.getById(organizationDTO.getId())
+    public OrganizationDTO update(OrganizationDTO organizationDTO) {
+        Organization organization = organizationRepository.getById(organizationDTO.getId())
                 .orElseThrow(() -> new OrganizationNotFoundException("Organization not found"));
 
         if (organizationDTO.getName() != null) {
-            org.setName(organizationDTO.getName());
+            organization.setName(organizationDTO.getName());
         }
 
         if (organizationDTO.getCoordinates() != null) {
@@ -89,7 +90,7 @@ public class OrganizationService {
             }
             Coordinates coordinates = coordinatesRepository.getById(organizationDTO.getCoordinates().getId())
                     .orElseThrow(() -> new CoordinatesNotFoundException("Coordinates not found"));
-            org.setCoordinates(coordinates);
+            organization.setCoordinates(coordinates);
         }
 
         if (organizationDTO.getOfficialAddress() != null) {
@@ -98,45 +99,51 @@ public class OrganizationService {
             }
             Address officialAddress = addressRepository.getById(organizationDTO.getOfficialAddress().getId())
                     .orElseThrow(() -> new AddressNotFoundException("Official address not found"));
-            org.setOfficialAddress(officialAddress);
+            organization.setOfficialAddress(officialAddress);
         }
 
         if (organizationDTO.getPostalAddress() != null) {
             if (organizationDTO.getPostalAddress().getId() == null) {
-                org.setPostalAddress(null);
+                organization.setPostalAddress(null);
             } else {
                 Address postalAddress = addressRepository.getById(organizationDTO.getPostalAddress().getId())
                         .orElse(null);
-                org.setPostalAddress(postalAddress);
+                organization.setPostalAddress(postalAddress);
             }
         }
 
 
         if (organizationDTO.getAnnualTurnover() != null) {
-            org.setAnnualTurnover(organizationDTO.getAnnualTurnover());
+            organization.setAnnualTurnover(organizationDTO.getAnnualTurnover());
         }
 
         if (organizationDTO.getEmployeesCount() != null) {
-            org.setEmployeesCount(organizationDTO.getEmployeesCount());
+            organization.setEmployeesCount(organizationDTO.getEmployeesCount());
         }
 
         if (organizationDTO.getRating() != null) {
-            org.setRating(organizationDTO.getRating());
+            organization.setRating(organizationDTO.getRating());
         }
 
         if (organizationDTO.getFullName() != null) {
-            org.setFullName(organizationDTO.getFullName());
+            organization.setFullName(organizationDTO.getFullName());
         }
 
         if (organizationDTO.getType() != null) {
-            org.setType(organizationDTO.getType());
+            organization.setType(organizationDTO.getType());
         }
+
+        return organizationMapper.toDTO(organization);
     }
 
     @Transactional
-    public void delete(Integer id) {
+    public OrganizationDTO delete(Integer id) {
         Organization organization = organizationRepository.getById(id)
                 .orElseThrow(() -> new OrganizationNotFoundException("Organization not found"));
         organizationRepository.delete(organization);
+
+        OrganizationDTO organizationDTO = new OrganizationDTO();
+        organizationDTO.setId(id);
+        return organizationDTO;
     }
 }

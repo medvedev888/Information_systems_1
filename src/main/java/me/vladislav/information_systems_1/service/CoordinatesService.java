@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import me.vladislav.information_systems_1.dto.CoordinatesDTO;
+import me.vladislav.information_systems_1.dto.PageResponse;
 import me.vladislav.information_systems_1.exception.CoordinatesNotFoundException;
 import me.vladislav.information_systems_1.mapper.CoordinatesMapper;
 import me.vladislav.information_systems_1.model.Coordinates;
@@ -20,25 +21,29 @@ public class CoordinatesService {
     private CoordinatesMapper coordinatesMapper;
 
     @Transactional
-    public List<CoordinatesDTO> getPage(Integer page, Integer size) {
-        List<Coordinates> coordinatesList = coordinatesRepository.getPage(page, size);
-        return coordinatesList.stream()
+    public PageResponse<CoordinatesDTO> getPage(Integer page, Integer size) {
+        List<CoordinatesDTO> coordinates = coordinatesRepository.getPage(page, size).stream()
                 .map(coordinatesMapper::toDTO)
                 .toList();
+        long totalCount = coordinatesRepository.count();
+        Integer totalPages = (int) Math.ceil((double) totalCount / size);
+        return new PageResponse<>(coordinates, totalPages);
     }
 
     @Transactional
-    public void save(CoordinatesDTO coordinatesDTO) {
+    public CoordinatesDTO save(CoordinatesDTO coordinatesDTO) {
         Coordinates coordinates = new Coordinates();
 
         coordinates.setX(coordinatesDTO.getX());
         coordinates.setY(coordinatesDTO.getY());
 
         coordinatesRepository.save(coordinates);
+
+        return coordinatesMapper.toDTO(coordinates);
     }
 
     @Transactional
-    public void update(CoordinatesDTO coordinatesDTO) {
+    public CoordinatesDTO update(CoordinatesDTO coordinatesDTO) {
         Coordinates coordinates = coordinatesRepository.getById(coordinatesDTO.getId())
                 .orElseThrow(() -> new CoordinatesNotFoundException("Coordinates not found"));
 
@@ -49,12 +54,17 @@ public class CoordinatesService {
         if (coordinatesDTO.getY() != null) {
             coordinates.setY(coordinatesDTO.getY());
         }
+        return coordinatesMapper.toDTO(coordinates);
     }
 
     @Transactional
-    public void delete(Long id) {
+    public CoordinatesDTO delete(Long id) {
         Coordinates coordinates = coordinatesRepository.getById(id)
                 .orElseThrow(() -> new CoordinatesNotFoundException("Coordinates not found"));
         coordinatesRepository.delete(coordinates);
+
+        CoordinatesDTO coordinatesDTO = new CoordinatesDTO();
+        coordinatesDTO.setId(id);
+        return coordinatesDTO;
     }
 }

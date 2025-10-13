@@ -15,6 +15,12 @@ public class LocationRepository {
     @PersistenceContext(unitName = "Lab1PU")
     private EntityManager entityManager;
 
+    public long count() {
+        return entityManager
+                .createQuery("SELECT COUNT(l) FROM Location l", Long.class)
+                .getSingleResult();
+    }
+
     public Optional<Location> getById(Long id) {
         return Optional.ofNullable(entityManager.find(Location.class, id));
     }
