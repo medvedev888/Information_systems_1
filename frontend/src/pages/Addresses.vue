@@ -12,16 +12,8 @@ const rows = reactive([]);
 
 const columns = [
   { key: "id", label: "ID" },
-  { key: "name", label: "Name" },
-  { key: "coordinates", label: "Coordinates" },
-  { key: "creationDate", label: "Creation Date" },
-  { key: "officialAddress", label: "Official Address" },
-  { key: "annualTurnover", label: "Annual Turnover" },
-  { key: "employeesCount", label: "Employees Count" },
-  { key: "rating", label: "Rating" },
-  { key: "fullName", label: "Full Name" },
-  { key: "type", label: "Type" },
-  { key: "postalAddress", label: "Postal Address" },
+  { key: "street", label: "Street" },
+  { key: "town", label: "Town" },
   { key: "operation", label: "Operations"}
 ];
 
@@ -32,7 +24,7 @@ function handleRowClick(row) {
 
 async function fetchOrganizations() {
   try {
-    const res = await axios.get(`/organizations?page=${page.value}&size=5`);
+    const res = await axios.get(`/addresses?page=${page.value}&size=3`);
     rows.splice(0, rows.length, ...res.data.data);
     totalPages.value = res.data.totalPages;
   } catch (err) {
@@ -53,13 +45,13 @@ watch(page, fetchOrganizations);
   <Header/>
   <div class="container">
     <div class="table-container">
-      <h2>Organizations</h2>
+      <h2>Addresses</h2>
       <Table :columns="columns" :rows="rows" @rowClick="handleRowClick"/>
     </div>
-      <Pagination
-        v-model:pageNumber="page"
-        :totalPages="totalPages"
-      />
+    <Pagination
+      v-model:pageNumber="page"
+      :totalPages="totalPages"
+    />
   </div>
 </template>
 

@@ -1,10 +1,11 @@
 <script setup>
 import {ref} from "vue";
-import {useRouter} from "vue-router";
+import {useRoute, useRouter} from "vue-router";
 import Button from "@/components/button.vue";
 import Link from "@/components/link.vue";
 
 const router = useRouter();
+const route = useRoute();
 const userLogin = ref(localStorage.getItem("userLogin") || "Guest");
 
 function logout() {
@@ -12,6 +13,11 @@ function logout() {
   localStorage.removeItem("userLogin");
   router.push("/login");
 }
+
+function isActive(href) {
+  return route.path === href;
+}
+
 </script>
 
 
@@ -27,14 +33,17 @@ function logout() {
 
     <div class="center">
       <Link
-        class="nav-list"
-        label="Home"
-        href="/"
-      />
-      <Link
-        class="nav-list"
-        label="Operations"
-        href="/operations"
+        v-for="item in [
+          {label: 'Organizations', href: '/'},
+          {label: 'Addresses', href: '/addresses'},
+          {label: 'Locations', href: '/locations'},
+          {label: 'Coordinates', href: '/coordinates'},
+          {label: 'Operations', href: '/operations'},
+        ]"
+        :key="item.href"
+        :label="item.label"
+        :href="item.href"
+        :class="{ active: isActive(item.href) }"
       />
     </div>
 
@@ -61,8 +70,6 @@ function logout() {
 
 .left, .center, .right {
   padding: 0 2rem;
-/*  border-radius: 0.5rem;
-  border: 1px solid black;*/
   height: 5.25rem;
 }
 
@@ -101,7 +108,7 @@ function logout() {
 .center {
   display: flex;
   align-items: center;
-  gap: 5rem;
+  gap: 2rem;
   padding: 0 3rem;
 }
 
@@ -111,4 +118,10 @@ function logout() {
   gap: 1rem;
 }
 
+.active{
+  color: rgba(79, 70, 229, 0.8);
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  text-decoration: none;
+}
 </style>
