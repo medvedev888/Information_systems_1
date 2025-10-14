@@ -10,11 +10,29 @@ import axios from "@/axios.js";
 import EditIcon from '@/assets/editIcon.svg?component'
 import DeleteIcon from '@/assets/deleteIcon.svg?component'
 import DetailsPopup from "@/components/details-popup.vue";
+import FormCreate from "@/components/forms/form-create.vue";
+import Input from "@/components/input.vue";
+import Select from "@/components/select.vue";
 
 const page = ref(1);
 const totalPages = ref(1);
 const rows = reactive([]);
 const popup = reactive({visible: false, data: null, x: 0, y: 0});
+const showCreate = ref(false)
+const form = ref({
+  name: '',
+  fullName: '',
+  coordinates: null,
+  officialAddress: null,
+  annualTurnover: null,
+  employeesCount: null,
+  rating: null,
+  type: null,
+  postalAddress: null
+})
+const organizationTypes = ['COMMERCIAL', 'PUBLIC', 'TRUST'];
+
+
 
 const columns = [
   {key: "id", label: "ID"},
@@ -53,7 +71,7 @@ function hideDetails() {
 }
 
 function addRow(row) {
-  console.log("add: " + row)
+
 }
 
 function editRow(row) {
@@ -66,7 +84,7 @@ function deleteRow(row) {
 
 async function fetchOrganizations() {
   try {
-    const res = await axios.get(`/organizations?page=${page.value}&size=3`);
+    const res = await axios.get(`/organizations?page=${page.value}&size=1`);
     const orgs = res.data.data || [];
 
     orgs.forEach(row => {
@@ -112,7 +130,7 @@ watch(page, fetchOrganizations);
     <div class="table-container">
       <div class="table-header">
         <h2>Organizations</h2>
-        <Button label="Create" type="button" @click="addRow"/>
+        <Button label="Create" type="button" @click="showCreate = true"/>
       </div>
       <Table :columns="columns" :rows="rows">
         <template #cell-coordinates="{ row }">
@@ -148,15 +166,65 @@ watch(page, fetchOrganizations);
 
   <!--  Overlay  -->
   <div
-    v-if="popup.visible"
+    v-if="popup.visible || showCreate"
     class="overlay"
     @mouseover="hideDetails"
   ></div>
 
+  <!--  Create Modal  -->
+  <FormCreate
+    v-if="showCreate"
+    title="Create Organization"
+    @submit="addRow"
+    @cancel="showCreate = false"
+  >
+    <div class="form-group">
+      <p>Name:</p>
+      <Input v-model="form.name" placeholder="Name"/>
+    </div>
+
+    <div class="form-group">
+      <p>Type:</p>
+      <Select v-model="form.type" :options="organizationTypes" />
+    </div>
+
+    <div class="form-group">
+      <p>Coordinates:</p>
+      <Select v-model="form.coordinates" :options="coordinatesList" />
+    </div>
+
+    <div class="form-group">
+      <p>Official Address:</p>
+      <Select v-model="form.officialAddress" :options="addressesList" />
+    </div>
+
+    <div class="form-group">
+      <p>Postal Address:</p>
+      <Select v-model="form.postalAddress" :options="addressesList" />
+    </div>
+
+    <div class="form-group">
+      <p>Annual turnover:</p>
+      <Input v-model.number="form.annualTurnover" type="number" placeholder="Annual turnover"/>
+    </div>
+
+    <div class="form-group">
+      <p>Employees count:</p>
+      <Input v-model.number="form.employeesCount" type="number" placeholder="Employees count"/>
+    </div>
+
+    <div class="form-group">
+      <p>Rating:</p>
+      <Input v-model.number="form.rating" type="number" placeholder="Rating"/>
+    </div>
+  </FormCreate>
+
 </template>
 
+
 <style scoped>
-h2 {
+
+h2, p {
   font-weight: lighter;
   margin: 0;
 }
@@ -197,6 +265,13 @@ h2 {
   transition: opacity 0.2s;
   z-index: 500;
   pointer-events: none;
+}
+
+.form-group {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
 }
 
 </style>
