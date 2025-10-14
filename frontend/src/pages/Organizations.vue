@@ -9,10 +9,12 @@ import axios from "@/axios.js";
 
 import EditIcon from '@/assets/editIcon.svg?component'
 import DeleteIcon from '@/assets/deleteIcon.svg?component'
+import DetailsPopup from "@/components/details-popup.vue";
 
 const page = ref(1);
 const totalPages = ref(1);
 const rows = reactive([]);
+const popup = reactive({visible: false, data: null, x: 0, y: 0});
 
 const columns = [
   {key: "id", label: "ID"},
@@ -29,6 +31,27 @@ const columns = [
   {key: "operations", label: "Operations"}
 ];
 
+let showTimer = null;
+let hideTimer = null;
+
+function showDetails(data, event) {
+  clearTimeout(hideTimer);
+  showTimer = setTimeout(() => {
+    popup.data = data;
+    popup.x = event.pageX + 10;
+    popup.y = event.pageY - 80;
+    popup.visible = true;
+  }, 100);
+}
+
+function hideDetails() {
+  clearTimeout(showTimer);
+  hideTimer = setTimeout(() => {
+    popup.visible = false;
+    popup.data = null;
+  }, 100);
+}
+
 function addRow(row) {
   console.log("add: " + row)
 }
@@ -44,7 +67,26 @@ function deleteRow(row) {
 async function fetchOrganizations() {
   try {
     const res = await axios.get(`/organizations?page=${page.value}&size=3`);
-    rows.splice(0, rows.length, ...res.data.data || []);
+    const orgs = res.data.data || [];
+
+    orgs.forEach(row => {
+      if (row.creationDate) {
+        row.creationDate = new Date(row.creationDate).toLocaleString('ru-RU', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      }
+
+      row.operations = [
+        {type: "Edit", icon: markRaw(EditIcon), onClick: () => editRow(row)},
+        {type: "Delete", icon: markRaw(DeleteIcon), onClick: () => deleteRow(row)}
+      ];
+    });
+
+    rows.splice(0, rows.length, ...orgs);
     totalPages.value = res.data.totalPages ?? 1;
 
     rows.forEach(row => {
@@ -72,10 +114,45 @@ watch(page, fetchOrganizations);
         <h2>Organizations</h2>
         <Button label="Create" type="button" @click="addRow"/>
       </div>
-      <Table :columns="columns" :rows="rows"/>
+      <Table :columns="columns" :rows="rows">
+        <template #cell-coordinates="{ row }">
+          <div @mouseenter="showDetails(row.coordinates, $event)" @mouseleave="hideDetails">
+            Coordinates #{{ row.coordinates.id }}
+          </div>
+        </template>
+
+        <template #cell-officialAddress="{ row }">
+          <div @mouseenter="showDetails(row.officialAddress, $event)" @mouseleave="hideDetails">
+            Official Address #{{ row.officialAddress.id }}
+          </div>
+        </template>
+
+        <template #cell-postalAddress="{ row }">
+          <div @mouseenter="showDetails(row.postalAddress, $event)" @mouseleave="hideDetails">
+            Postal Address #{{ row.postalAddress.id }}
+          </div>
+        </template>
+      </Table>
     </div>
     <Pagination v-model:pageNumber="page" :totalPages="totalPages"/>
   </div>
+
+  <!--  Всплывающее окно для отображения связанных объектов  -->
+  <DetailsPopup
+    class="details-popup"
+    :data="popup.data"
+    :x="popup.x"
+    :y="popup.y"
+    :visible="popup.visible"
+  />
+
+  <!--  Overlay  -->
+  <div
+    v-if="popup.visible"
+    class="overlay"
+    @mouseover="hideDetails"
+  ></div>
+
 </template>
 
 <style scoped>
@@ -100,6 +177,26 @@ h2 {
   flex-direction: row;
   justify-content: space-between;
   margin: 2rem 1rem 1rem;
+}
+
+.details-popup {
+  position: absolute;
+  background: white;
+  padding: 0.5rem 1rem;
+  border: 1px solid black;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.2);
+  transition: opacity 0.2s;
+  z-index: 500;
+  pointer-events: none;
 }
 
 </style>

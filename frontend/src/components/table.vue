@@ -32,7 +32,13 @@ const emit = defineEmits(["rowClick"]);
           </div>
         </template>
         <template v-else>
-          {{ row[col.key] }}
+          <slot
+            :name="`cell-${col.key}`"
+            :row="row"
+            :value="row[col.key]"
+          >
+            {{ row[col.key] }}
+          </slot>
         </template>
       </td>
     </tr>
@@ -55,7 +61,7 @@ th, td {
   text-align: center;
 }
 
-tr:hover {
+td:hover {
   background: rgba(79, 70, 229, 0.3);
   cursor: pointer;
 }
@@ -66,7 +72,7 @@ tr:hover {
 }
 
 td Button {
-  padding: 0.7rem;
+  padding: 0.6rem;
 }
 
 .button-container {
