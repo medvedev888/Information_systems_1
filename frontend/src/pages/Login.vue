@@ -1,5 +1,5 @@
 <script setup>
-import Form from "@/components/form.vue"
+import Form from "@/components/forms/form-auth.vue"
 import {reactive} from "vue";
 import router from "@/router/index.js";
 import Link from "@/components/link.vue";
