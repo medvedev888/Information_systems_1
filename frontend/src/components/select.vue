@@ -1,30 +1,86 @@
 <script setup>
-import {defineProps, defineEmits} from 'vue'
+import {computed} from 'vue'
 
 const props = defineProps({
-  modelValue: null,              // выбранное значение
-  options: {type: Array, default: () => []}, // список вариантов
-  labelKey: {type: String, default: 'label'},// что отображаем
-  valueKey: {type: String, default: 'value'},// что сохраняем
+  modelValue: null,
+  options: {type: Array, default: () => []},
+  valueKey: {type: String, default: 'id'},
+  labelKey: {type: String, default: 'name'},
+  allowNull: {type: Boolean, default: true},
+  placeholder: {type: String, default: ' Select '}
 })
 
 const emit = defineEmits(['update:modelValue'])
 
-function onChange(event) {
-  emit('update:modelValue', event.target.value)
+const normalized = computed(() => {
+  return props.options.map((opt, idx) => {
+    if (opt === null) {
+      return {raw: null, value: '', label: '', key: `null-${idx}`}
+    }
+    if (typeof opt !== 'object') {
+      return {raw: opt, value: String(opt), label: String(opt), key: `prim-${idx}`}
+    }
+    const rawValue = opt[props.valueKey] ?? ''
+    return {raw: opt, value: String(rawValue), label: null, key: `obj-${idx}`}
+  })
+})
+
+const currentValue = computed(() => {
+  if (props.modelValue === null) return ''
+  if (typeof props.modelValue === 'object') return String(props.modelValue[props.valueKey] ?? '')
+  return String(props.modelValue)
+})
+
+// красивый лейбл для объектов (координаты, адреса и т.д.)
+function formatLabel(opt) {
+  if (opt === null) return props.placeholder
+  if (typeof opt !== 'object') return String(opt)
+
+  if ('x' in opt && 'y' in opt && !('street' in opt)) {
+    return `Coordinates ${opt.id ?? ''} | x: ${opt.x}, y: ${opt.y}`
+  }
+
+  if ('street' in opt && 'town' in opt) {
+    const t = opt.town
+    let townStr = ''
+    if (t && typeof t === 'object' && 'x' in t && 'y' in t) {
+      townStr = `, town { x: ${t.x}, y: ${t.y}${'z' in t ? ', z: ' + t.z : ''} }`
+    }
+    return `Address ${opt.id ?? ''} | street: ${opt.street}${townStr}`
+  }
+
+  return String(opt[props.labelKey] ?? JSON.stringify(opt))
+}
+
+function onChange(e) {
+  const val = e.target.value
+  if (val === '') {
+    emit('update:modelValue', null)
+    return
+  }
+
+  const found = normalized.value.find(o => o.value === val)
+  if (!found) {
+    emit('update:modelValue', val)
+    return
+  }
+
+  emit('update:modelValue', found.raw)
 }
 </script>
 
 <template>
-  <select :value="modelValue" @change="onChange" class="select">
-    <option disabled value="">-- Select --</option>
+  <select :value="currentValue" @change="onChange" class="select">
+    <option v-if="allowNull" value="">{{ placeholder }}</option>
 
     <option
-      v-for="(opt, i) in options"
-      :key="i"
-      :value="typeof opt === 'object' ? opt[valueKey] : opt"
+      v-for="opt in normalized"
+      :key="opt.key"
+      :value="opt.value"
     >
-      {{ typeof opt === 'object' ? opt[labelKey] : opt }}
+      {{
+        opt.raw && typeof opt.raw === 'object' ? formatLabel(opt.raw) : (opt.label ?? formatLabel(opt.raw))
+      }}
     </option>
   </select>
 </template>
