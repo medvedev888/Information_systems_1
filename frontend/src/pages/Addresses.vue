@@ -25,7 +25,7 @@ const showUpdate = ref(false)
 const form = ref({
   id: '',
   street: '',
-  town: null,
+  town: null
 })
 const freeLocations = ref([]);
 
@@ -65,7 +65,7 @@ async function addRow(row) {
     await axios.post('/addresses', row);
     showCreate.value = false;
   } catch (err) {
-    console.error('Error saving addresses:', err);
+    console.error('Error saving address:', err);
   }
 }
 
@@ -78,7 +78,7 @@ async function updateRow(row) {
     await axios.patch('/addresses', payload);
     showUpdate.value = false;
   } catch(err) {
-    console.error('Error updating addresses:', err);
+    console.error('Error updating address:', err);
   }
 }
 
@@ -86,7 +86,7 @@ async function deleteRow(row) {
   try {
     await axios.delete(`/addresses/${row.id}`);
   } catch (err) {
-    console.error('Error deleting addresses:', err);
+    console.error('Error deleting address:', err);
   }
 }
 
@@ -237,7 +237,7 @@ watch(page, fetchAddresses);
   <!--  Update Modal  -->
   <FormUpdate
     v-if="showUpdate"
-    title="Update Organization"
+    title="Update Address"
     :form="form"
     @submit="updateRow"
     @cancel="showUpdate = false"
