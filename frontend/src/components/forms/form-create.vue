@@ -2,7 +2,8 @@
 import Button from "@/components/button.vue";
 
 const props = defineProps({
-  title: {type: String, default: 'Create'}
+  title: {type: String, default: 'Create'},
+  form: { type: Object, required: true }
 })
 
 const emit = defineEmits(['submit', 'cancel'])
@@ -16,7 +17,7 @@ const emit = defineEmits(['submit', 'cancel'])
         <h2>{{ title }}</h2>
         <slot/>
         <div class="actions">
-          <Button @click="emit('submit')"
+          <Button @click="emit('submit', props.form)"
                   label="Create"
           />
           <Button @click="emit('cancel')"
