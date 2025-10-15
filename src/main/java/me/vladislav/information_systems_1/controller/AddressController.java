@@ -7,6 +7,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import me.vladislav.information_systems_1.dto.AddressDTO;
+import me.vladislav.information_systems_1.dto.LocationDTO;
 import me.vladislav.information_systems_1.dto.PageResponse;
 import me.vladislav.information_systems_1.service.AddressService;
 import me.vladislav.information_systems_1.service.EventService;
@@ -29,6 +30,13 @@ public class AddressController {
     public Response getPage(@QueryParam("page") Integer page, @QueryParam("size") Integer size) {
         PageResponse<AddressDTO> response = addressService.getPage(page, size);
         return Response.ok(response).build();
+    }
+
+    @GET
+    @Path("/free-locations")
+    public Response getFreeAddresses() {
+        List<LocationDTO> locations = addressService.getFreeLocations();
+        return Response.ok(locations).build();
     }
 
     @POST

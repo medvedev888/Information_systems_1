@@ -3,11 +3,12 @@ package me.vladislav.information_systems_1.service;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import me.vladislav.information_systems_1.dto.OrganizationDTO;
-import me.vladislav.information_systems_1.dto.PageResponse;
+import me.vladislav.information_systems_1.dto.*;
 import me.vladislav.information_systems_1.exception.AddressNotFoundException;
 import me.vladislav.information_systems_1.exception.CoordinatesNotFoundException;
 import me.vladislav.information_systems_1.exception.OrganizationNotFoundException;
+import me.vladislav.information_systems_1.mapper.AddressMapper;
+import me.vladislav.information_systems_1.mapper.CoordinatesMapper;
 import me.vladislav.information_systems_1.mapper.OrganizationMapper;
 import me.vladislav.information_systems_1.model.Address;
 import me.vladislav.information_systems_1.model.Coordinates;
@@ -33,6 +34,12 @@ public class OrganizationService {
     @Inject
     private OrganizationMapper organizationMapper;
 
+    @Inject
+    private AddressMapper addressMapper;
+
+    @Inject
+    private CoordinatesMapper coordinatesMapper;
+
     @Transactional
     public PageResponse<OrganizationDTO> getPage(Integer page, Integer size) {
         List<OrganizationDTO> organizations = organizationRepository.getPage(page, size).stream()
@@ -41,6 +48,33 @@ public class OrganizationService {
         long totalCount = organizationRepository.count();
         Integer totalPages = (int) Math.ceil((double) totalCount / size);
         return new PageResponse<>(organizations, totalPages);
+    }
+
+    @Transactional
+    public List<AddressDTO> getFreeOfficialAddresses() {
+        return addressRepository.getFreeAddresses()
+                .stream()
+                .map(addressMapper::toDTO)
+                .toList();
+    }
+
+    @Transactional
+    public List<AddressDTO> getFreePostalAddresses() {
+        List<AddressDTO> freePostalAddresses = new java.util.ArrayList<>(addressRepository.getFreeAddresses()
+                .stream()
+                .map(addressMapper::toDTO)
+                .toList());
+
+        freePostalAddresses.add(null);
+        return freePostalAddresses;
+    }
+
+    @Transactional
+    public List<CoordinatesDTO> getFreeCoordinates() {
+        return coordinatesRepository.getFreeCoordinates()
+                .stream()
+                .map(coordinatesMapper::toDTO)
+                .toList();
     }
 
     @Transactional

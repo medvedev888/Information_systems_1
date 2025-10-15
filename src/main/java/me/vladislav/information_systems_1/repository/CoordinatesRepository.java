@@ -3,7 +3,6 @@ package me.vladislav.information_systems_1.repository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import me.vladislav.information_systems_1.model.Address;
 import me.vladislav.information_systems_1.model.Coordinates;
 
 import java.util.List;
@@ -27,6 +26,13 @@ public class CoordinatesRepository {
 
     public List<Coordinates> getAll() {
         return entityManager.createQuery("SELECT c FROM Coordinates c", Coordinates.class).getResultList();
+    }
+
+    public List<Coordinates> getFreeCoordinates() {
+        return entityManager.createQuery(
+                        "SELECT c FROM Coordinates c WHERE c NOT IN " +
+                                "(SELECT o.coordinates FROM Organization o)", Coordinates.class)
+                .getResultList();
     }
 
     public List<Coordinates> getPage(int page, int size) {

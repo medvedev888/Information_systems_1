@@ -28,6 +28,14 @@ public class AddressRepository {
         return entityManager.createQuery("SELECT a FROM Address a", Address.class).getResultList();
     }
 
+    public List<Address> getFreeAddresses() {
+        return entityManager.createQuery(
+                        "SELECT a FROM Address a WHERE a NOT IN " +
+                                "(SELECT o.officialAddress FROM Organization o) AND a NOT IN " +
+                                "(SELECT o.postalAddress FROM Organization o)", Address.class)
+                .getResultList();
+    }
+
     public List<Address> getPage(Integer page, Integer size) {
         return entityManager.createQuery("SELECT a FROM Address a", Address.class)
                 .setFirstResult((page - 1) * size)
