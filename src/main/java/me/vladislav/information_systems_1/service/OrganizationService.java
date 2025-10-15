@@ -136,16 +136,17 @@ public class OrganizationService {
             organization.setOfficialAddress(officialAddress);
         }
 
-        if (organizationDTO.getPostalAddress() != null) {
+        if (organizationDTO.getPostalAddress() == null) {
+            organization.setPostalAddress(null);
+        } else {
             if (organizationDTO.getPostalAddress().getId() == null) {
-                organization.setPostalAddress(null);
+                throw new AddressNotFoundException("Postal address ID is required");
             } else {
                 Address postalAddress = addressRepository.getById(organizationDTO.getPostalAddress().getId())
                         .orElse(null);
                 organization.setPostalAddress(postalAddress);
             }
         }
-
 
         if (organizationDTO.getAnnualTurnover() != null) {
             organization.setAnnualTurnover(organizationDTO.getAnnualTurnover());

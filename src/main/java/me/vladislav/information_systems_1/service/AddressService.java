@@ -78,15 +78,16 @@ public class AddressService {
             address.setStreet(addressDTO.getStreet());
         }
 
-        if (addressDTO.getTown() != null) {
+        if (addressDTO.getTown() == null) {
+            address.setTown(null);
+        } else {
             if (addressDTO.getTown().getId() == null) {
                 throw new LocationNotFoundException("Location ID is required");
+            } else {
+                Location town = locationRepository.getById(addressDTO.getTown().getId())
+                        .orElseThrow(null);
+                address.setTown(town);
             }
-
-            Location town = locationRepository.getById(addressDTO.getTown().getId())
-                    .orElseThrow(() -> new LocationNotFoundException("Location not found"));
-
-            address.setTown(town);
         }
 
         return addressMapper.toDTO(address);
