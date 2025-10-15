@@ -4,10 +4,12 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import me.vladislav.information_systems_1.dto.AddressDTO;
+import me.vladislav.information_systems_1.dto.LocationDTO;
 import me.vladislav.information_systems_1.dto.PageResponse;
 import me.vladislav.information_systems_1.exception.AddressNotFoundException;
 import me.vladislav.information_systems_1.exception.LocationNotFoundException;
 import me.vladislav.information_systems_1.mapper.AddressMapper;
+import me.vladislav.information_systems_1.mapper.LocationMapper;
 import me.vladislav.information_systems_1.model.Address;
 import me.vladislav.information_systems_1.model.Location;
 import me.vladislav.information_systems_1.repository.AddressRepository;
@@ -26,6 +28,9 @@ public class AddressService {
     @Inject
     private AddressMapper addressMapper;
 
+    @Inject
+    private LocationMapper locationMapper;
+
     @Transactional
     public PageResponse<AddressDTO> getPage(Integer page, Integer size) {
         List<AddressDTO> addresses = addressRepository.getPage(page, size).stream()
@@ -35,6 +40,17 @@ public class AddressService {
         long totalCount = addressRepository.count();
         Integer totalPages = (int) Math.ceil((double) totalCount / size);
         return new PageResponse<>(addresses, totalPages);
+    }
+
+    @Transactional
+    public List<LocationDTO> getFreeLocations() {
+        List<LocationDTO> freeLocations = new java.util.ArrayList<>(locationRepository.getFreeLocations()
+                .stream()
+                .map(locationMapper::toDTO)
+                .toList());
+
+        freeLocations.add(null);
+        return freeLocations;
     }
 
     @Transactional
