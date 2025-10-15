@@ -30,7 +30,7 @@ const form = ref({
   fullName: '',
   type: null
 })
-const organizationTypes = ['COMMERCIAL', 'PUBLIC', 'TRUST'];
+const organizationTypes = ['COMMERCIAL', 'GOVERNMENT', 'TRUST'];
 const freeCoordinates = ref([]);
 const freeOfficialAddresses = ref([]);
 const freePostalAddresses = ref([]);
@@ -72,10 +72,9 @@ function hideDetails() {
 }
 
 async function addRow(row) {
-  console.log(row)
   try {
     const res = await axios.post('/organizations', row);
-    console.log('Saved:', res.data);
+    await fetchOrganizations();
   } catch (err) {
     console.error('Error saving organization:', err);
   }
@@ -85,8 +84,13 @@ function editRow(row) {
   console.log("edit: " + row)
 }
 
-function deleteRow(row) {
-  console.log("delete: " + row)
+async function deleteRow(row) {
+  try {
+    await axios.delete(`/organizations/${row.id}`);
+    await fetchOrganizations();
+  } catch (err) {
+    console.error('Error deleting organization:', err);
+  }
 }
 
 function openCreateModal() {
@@ -120,13 +124,6 @@ async function fetchOrganizations() {
 
     rows.splice(0, rows.length, ...orgs);
     totalPages.value = res.data.totalPages ?? 1;
-
-    rows.forEach(row => {
-      row.operations = [
-        {type: "Edit", icon: markRaw(EditIcon), onClick: () => editRow(row)},
-        {type: "Delete", icon: markRaw(DeleteIcon), onClick: () => deleteRow(row)}
-      ];
-    });
 
   } catch (err) {
     console.error("Error fetching organizations:", err);

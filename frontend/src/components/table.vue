@@ -9,7 +9,6 @@ const props = defineProps({
 
 const emit = defineEmits(["rowClick"]);
 
-
 function formatCellValue(value) {
   if (value === null || value === undefined) {
     return {display: '', safe: null};
@@ -64,7 +63,7 @@ function formatCellValue(value) {
               :key="btn.type"
               :label="btn.type"
               :icon="btn.icon"
-              @click.stop="btn.onClick"
+              @click="btn.onClick"
             />
           </div>
         </template>
