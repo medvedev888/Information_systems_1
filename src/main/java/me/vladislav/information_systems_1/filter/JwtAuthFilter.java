@@ -17,7 +17,7 @@ public class JwtAuthFilter implements ContainerRequestFilter {
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
         String path = requestContext.getUriInfo().getPath();
-        if (path.startsWith("/auth")) {
+        if (path.startsWith("/auth") || path.startsWith("/events")) {
             return;
         }
 
