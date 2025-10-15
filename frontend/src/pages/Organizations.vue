@@ -13,12 +13,14 @@ import DetailsPopup from "@/components/details-popup.vue";
 import FormCreate from "@/components/forms/form-create.vue";
 import Input from "@/components/input.vue";
 import Select from "@/components/select.vue";
+import FormUpdate from "@/components/forms/form-update.vue";
 
 const page = ref(1);
 const totalPages = ref(1);
 const rows = reactive([]);
 const popup = reactive({visible: false, data: null, x: 0, y: 0});
 const showCreate = ref(false)
+const showUpdate = ref(false)
 const form = ref({
   name: '',
   coordinates: null,
@@ -75,13 +77,24 @@ async function addRow(row) {
   try {
     const res = await axios.post('/organizations', row);
     await fetchOrganizations();
+    showCreate.value = false;
   } catch (err) {
     console.error('Error saving organization:', err);
   }
 }
 
-function editRow(row) {
-  console.log("edit: " + row)
+async function updateRow(row) {
+  try {
+    const payload = { ...row };
+    delete payload.operations;
+    delete payload.creationDate;
+
+    const res = await axios.patch('/organizations', payload);
+    await fetchOrganizations();
+    showUpdate.value = false
+  } catch(err) {
+    console.error('Error updating organization:', err);
+  }
 }
 
 async function deleteRow(row) {
@@ -94,10 +107,52 @@ async function deleteRow(row) {
 }
 
 function openCreateModal() {
+  resetForm();
   showCreate.value = true;
   fetchFreeCoordinates();
   fetchFreeAddresses('official');
   fetchFreeAddresses('postal');
+}
+
+async function openUpdateModal(row) {
+  form.value = {
+    ...row
+  }
+
+  await fetchFreeCoordinates()
+  if (row.coordinates) freeCoordinates.value.push(row.coordinates)
+
+  await fetchFreeAddresses('official')
+  if (row.officialAddress && !freeOfficialAddresses.value.some(a => a?.id === row.officialAddress.id)) {
+    freeOfficialAddresses.value.push(row.officialAddress)
+  }
+  if (row.postalAddress && !freeOfficialAddresses.value.some(a => a?.id === row.postalAddress.id)) {
+    freeOfficialAddresses.value.push(row.postalAddress)
+  }
+
+  await fetchFreeAddresses('postal')
+  if (row.postalAddress && !freePostalAddresses.value.some(a => a?.id === row.postalAddress.id)) {
+    freePostalAddresses.value.push(row.postalAddress)
+  }
+  if (row.officialAddress && !freePostalAddresses.value.some(a => a?.id === row.officialAddress.id)) {
+    freePostalAddresses.value.push(row.officialAddress)
+  }
+
+  showUpdate.value = true;
+}
+
+function resetForm() {
+  form.value = {
+    name: '',
+    coordinates: null,
+    officialAddress: null,
+    postalAddress: null,
+    annualTurnover: null,
+    employeesCount: null,
+    rating: null,
+    fullName: '',
+    type: null
+  }
 }
 
 async function fetchOrganizations() {
@@ -117,7 +172,7 @@ async function fetchOrganizations() {
       }
 
       row.operations = [
-        {type: "Edit", icon: markRaw(EditIcon), onClick: () => editRow(row)},
+        {type: "Edit", icon: markRaw(EditIcon), onClick: () => openUpdateModal(row)},
         {type: "Delete", icon: markRaw(DeleteIcon), onClick: () => deleteRow(row)}
       ];
     });
@@ -207,7 +262,7 @@ watch(page, fetchOrganizations);
 
   <!--  Overlay  -->
   <div
-    v-if="popup.visible || showCreate"
+    v-if="popup.visible || showCreate || showUpdate"
     class="overlay"
     @mouseover="hideDetails"
   ></div>
@@ -268,6 +323,64 @@ watch(page, fetchOrganizations);
       <Input v-model.number="form.rating" type="number" placeholder="Rating"/>
     </div>
   </FormCreate>
+
+
+  <!--  Update Modal  -->
+  <FormUpdate
+    v-if="showUpdate"
+    title="Update Organization"
+    :form="form"
+    @submit="updateRow"
+    @cancel="showUpdate = false"
+  >
+
+    <div class="form-group">
+      <p>Name:</p>
+      <Input v-model="form.name" placeholder="Name"/>
+    </div>
+
+    <div class="form-group">
+      <p>Full Name:</p>
+      <Input v-model="form.fullName" placeholder="Full Name"/>
+    </div>
+
+    <div class="form-group">
+      <p>Type:</p>
+      <Select v-model="form.type" :options="organizationTypes"/>
+    </div>
+
+    <div class="form-group">
+      <p>Coordinates:</p>
+      <Select v-model="form.coordinates" :options="freeCoordinates" labelKey="name" valueKey="id"/>
+    </div>
+
+    <div class="form-group">
+      <p>Official Address:</p>
+      <Select v-model="form.officialAddress" :options="freeOfficialAddresses" labelKey="street"
+              valueKey="id"/>
+    </div>
+
+    <div class="form-group">
+      <p>Postal Address:</p>
+      <Select v-model="form.postalAddress" :options="freePostalAddresses" labelKey="street"
+              valueKey="id"/>
+    </div>
+
+    <div class="form-group">
+      <p>Annual turnover:</p>
+      <Input v-model.number="form.annualTurnover" type="number" placeholder="Annual turnover"/>
+    </div>
+
+    <div class="form-group">
+      <p>Employees count:</p>
+      <Input v-model.number="form.employeesCount" type="number" placeholder="Employees count"/>
+    </div>
+
+    <div class="form-group">
+      <p>Rating:</p>
+      <Input v-model.number="form.rating" type="number" placeholder="Rating"/>
+    </div>
+  </FormUpdate>
 
 </template>
 
