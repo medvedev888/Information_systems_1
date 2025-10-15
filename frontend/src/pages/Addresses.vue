@@ -73,7 +73,6 @@ async function updateRow(row) {
   try {
     const payload = { ...row };
     delete payload.operations;
-    delete payload.creationDate;
 
     await axios.patch('/addresses', payload);
     showUpdate.value = false;
@@ -117,7 +116,7 @@ function resetForm() {
 // ----------------- Fetch -----------------
 async function fetchAddresses() {
   try {
-    const res = await axios.get(`/addresses?page=${page.value}&size=10`);
+    const res = await axios.get(`/addresses?page=${page.value}&size=8`);
     const addresses = res.data.data || [];
 
     addresses.forEach(row => {

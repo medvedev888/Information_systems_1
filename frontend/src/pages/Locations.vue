@@ -50,7 +50,6 @@ async function updateRow(row) {
   try {
     const payload = {...row};
     delete payload.operations;
-    delete payload.creationDate;
 
     await axios.patch('/locations', payload);
     showUpdate.value = false;
@@ -90,7 +89,7 @@ function resetForm() {
 // ----------------- Fetch -----------------
 async function fetchLocations() {
   try {
-    const res = await axios.get(`/locations?page=${page.value}&size=10`);
+    const res = await axios.get(`/locations?page=${page.value}&size=8`);
     const locations = res.data.data || [];
 
     locations.forEach(row => {
@@ -186,7 +185,7 @@ watch(page, fetchLocations);
   <!--  Update Modal  -->
   <FormUpdate
     v-if="showUpdate"
-    title="Update Organization"
+    title="Update Location"
     :form="form"
     @submit="updateRow"
     @cancel="showUpdate = false"
