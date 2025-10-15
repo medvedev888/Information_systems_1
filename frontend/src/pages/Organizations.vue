@@ -3,7 +3,7 @@ import Table from "@/components/table.vue";
 import Header from "@/components/header.vue";
 import Button from "@/components/button.vue";
 
-import {reactive, ref, onMounted, watch, markRaw} from "vue";
+import {markRaw, onMounted, reactive, ref, watch} from "vue";
 import Pagination from "@/components/pagination.vue";
 import axios from "@/axios.js";
 
@@ -21,18 +21,19 @@ const popup = reactive({visible: false, data: null, x: 0, y: 0});
 const showCreate = ref(false)
 const form = ref({
   name: '',
-  fullName: '',
   coordinates: null,
   officialAddress: null,
+  postalAddress: null,
   annualTurnover: null,
   employeesCount: null,
   rating: null,
-  type: null,
-  postalAddress: null
+  fullName: '',
+  type: null
 })
 const organizationTypes = ['COMMERCIAL', 'PUBLIC', 'TRUST'];
-
-
+const freeCoordinates = ref([]);
+const freeOfficialAddresses = ref([]);
+const freePostalAddresses = ref([]);
 
 const columns = [
   {key: "id", label: "ID"},
@@ -70,8 +71,14 @@ function hideDetails() {
   }, 100);
 }
 
-function addRow(row) {
-
+async function addRow(row) {
+  console.log(row)
+  try {
+    const res = await axios.post('/organizations', row);
+    console.log('Saved:', res.data);
+  } catch (err) {
+    console.error('Error saving organization:', err);
+  }
 }
 
 function editRow(row) {
@@ -82,9 +89,16 @@ function deleteRow(row) {
   console.log("delete: " + row)
 }
 
+function openCreateModal() {
+  showCreate.value = true;
+  fetchFreeCoordinates();
+  fetchFreeAddresses('official');
+  fetchFreeAddresses('postal');
+}
+
 async function fetchOrganizations() {
   try {
-    const res = await axios.get(`/organizations?page=${page.value}&size=1`);
+    const res = await axios.get(`/organizations?page=${page.value}&size=5`);
     const orgs = res.data.data || [];
 
     orgs.forEach(row => {
@@ -114,9 +128,27 @@ async function fetchOrganizations() {
       ];
     });
 
-
   } catch (err) {
     console.error("Error fetching organizations:", err);
+  }
+}
+
+async function fetchFreeCoordinates() {
+  try {
+    const res = await axios.get('/organizations/free-coordinates');
+    freeCoordinates.value = res.data || [];
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+async function fetchFreeAddresses(type) {
+  try {
+    const res = await axios.get(`/organizations/free-addresses?type=${type}`);
+    if (type === 'official') freeOfficialAddresses.value = res.data || [];
+    else if (type === 'postal') freePostalAddresses.value = res.data || [];
+  } catch (err) {
+    console.error(err);
   }
 }
 
@@ -130,24 +162,36 @@ watch(page, fetchOrganizations);
     <div class="table-container">
       <div class="table-header">
         <h2>Organizations</h2>
-        <Button label="Create" type="button" @click="showCreate = true"/>
+        <Button label="Create" type="button" @click="openCreateModal"/>
       </div>
       <Table :columns="columns" :rows="rows">
-        <template #cell-coordinates="{ row }">
-          <div @mouseenter="showDetails(row.coordinates, $event)" @mouseleave="hideDetails">
-            Coordinates #{{ row.coordinates.id }}
+        <template #cell-coordinates="{ safeValue }">
+          <div
+            v-if="safeValue?.id"
+            @mouseenter="safeValue && showDetails(safeValue, $event)"
+            @mouseleave="hideDetails"
+          >
+            Coordinates #{{ safeValue?.id ?? '' }}
           </div>
         </template>
 
-        <template #cell-officialAddress="{ row }">
-          <div @mouseenter="showDetails(row.officialAddress, $event)" @mouseleave="hideDetails">
-            Official Address #{{ row.officialAddress.id }}
+        <template #cell-officialAddress="{ safeValue }">
+          <div
+            v-if="safeValue?.id"
+            @mouseenter="safeValue && showDetails(safeValue, $event)"
+            @mouseleave="hideDetails"
+          >
+            Official Address #{{ safeValue?.id ?? '' }}
           </div>
         </template>
 
-        <template #cell-postalAddress="{ row }">
-          <div @mouseenter="showDetails(row.postalAddress, $event)" @mouseleave="hideDetails">
-            Postal Address #{{ row.postalAddress.id }}
+        <template #cell-postalAddress="{ safeValue }">
+          <div
+            v-if="safeValue?.id"
+            @mouseenter="safeValue && showDetails(safeValue, $event)"
+            @mouseleave="hideDetails"
+          >
+            Postal Address #{{ safeValue?.id ?? '' }}
           </div>
         </template>
       </Table>
@@ -175,32 +219,41 @@ watch(page, fetchOrganizations);
   <FormCreate
     v-if="showCreate"
     title="Create Organization"
+    :form="form"
     @submit="addRow"
     @cancel="showCreate = false"
   >
+
     <div class="form-group">
       <p>Name:</p>
       <Input v-model="form.name" placeholder="Name"/>
     </div>
 
     <div class="form-group">
+      <p>Full Name:</p>
+      <Input v-model="form.fullName" placeholder="Full Name"/>
+    </div>
+
+    <div class="form-group">
       <p>Type:</p>
-      <Select v-model="form.type" :options="organizationTypes" />
+      <Select v-model="form.type" :options="organizationTypes"/>
     </div>
 
     <div class="form-group">
       <p>Coordinates:</p>
-      <Select v-model="form.coordinates" :options="coordinatesList" />
+      <Select v-model="form.coordinates" :options="freeCoordinates" labelKey="name" valueKey="id"/>
     </div>
 
     <div class="form-group">
       <p>Official Address:</p>
-      <Select v-model="form.officialAddress" :options="addressesList" />
+      <Select v-model="form.officialAddress" :options="freeOfficialAddresses" labelKey="street"
+              valueKey="id"/>
     </div>
 
     <div class="form-group">
       <p>Postal Address:</p>
-      <Select v-model="form.postalAddress" :options="addressesList" />
+      <Select v-model="form.postalAddress" :options="freePostalAddresses" labelKey="street"
+              valueKey="id"/>
     </div>
 
     <div class="form-group">
