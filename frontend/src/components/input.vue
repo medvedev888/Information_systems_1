@@ -1,7 +1,7 @@
 <script setup>
 const props = defineProps({
   text: {type: String, default: "Enter text"},
-  modelValue: {type: String, default: ""},
+  modelValue: {type: [String, Number], default: ""},
   type: {type: String, default: "text"}
 })
 
