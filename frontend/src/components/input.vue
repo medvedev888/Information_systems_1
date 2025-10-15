@@ -25,6 +25,7 @@ const emit = defineEmits(["update:modelValue"])
   border-radius: 0.375rem;
   width: 100%;
   box-sizing: border-box;
+  height: 2rem;
 }
 
 .input:focus {

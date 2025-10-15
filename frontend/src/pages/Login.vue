@@ -1,28 +1,28 @@
 <script setup>
-import Form from "@/components/form.vue"
+import Form from "@/components/forms/form-auth.vue"
 import {reactive} from "vue";
 import router from "@/router/index.js";
 import Link from "@/components/link.vue";
+import axios from "@/axios.js";
+
 
 const formData = reactive({login: "", password: ""});
 
 async function authRequest(endpoint, login, password) {
   try {
-    const res = await fetch(`http://localhost:8080/Lab_1-1.0-SNAPSHOT/api/auth/${endpoint}`, {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({login, password})
-    });
-    const data = await res.json();
-
-    if (res.ok) {
-      localStorage.setItem("jwt", data.token);
-      return {success: true};
-    } else {
-      return {success: false, errors: data.errors || {general: data.message}};
-    }
+    const res = await axios.post(`/auth/${endpoint}`, { login, password });
+    localStorage.setItem("jwt", res.data.token);
+    localStorage.setItem("userLogin", res.data.userDTO.login);
+    return { success: true };
   } catch (err) {
-    return {success: false, errors: {general: "Network error"}};
+    if (err.response) {
+      return {
+        success: false,
+        errors: err.response.data.errors || { general: err.response.data.message }
+      };
+    } else {
+      return { success: false, errors: { general: "Network error" } };
+    }
   }
 }
 
