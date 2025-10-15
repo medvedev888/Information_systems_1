@@ -30,10 +30,12 @@ public class LocationRepository {
 
     public List<Location> getFreeLocations() {
         return entityManager.createQuery(
-                "SELECT l FROM Location l WHERE l NOT IN (SELECT a.town FROM Address a WHERE a.town IS NOT NULL)",
+                "SELECT l FROM Location l WHERE l NOT IN " +
+                        "(SELECT a.town FROM Address a WHERE a.town IS NOT NULL)",
                 Location.class
         ).getResultList();
     }
+
 
     public List<Location> getPage(int page, int size) {
         return entityManager.createQuery("SELECT l FROM Location l", Location.class)

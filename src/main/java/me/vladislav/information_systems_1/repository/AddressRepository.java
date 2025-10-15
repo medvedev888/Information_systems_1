@@ -30,10 +30,11 @@ public class AddressRepository {
 
     public List<Address> getFreeAddresses() {
         return entityManager.createQuery(
-                        "SELECT a FROM Address a WHERE a NOT IN " +
-                                "(SELECT o.officialAddress FROM Organization o) AND a NOT IN " +
-                                "(SELECT o.postalAddress FROM Organization o)", Address.class)
-                .getResultList();
+                "SELECT a FROM Address a " +
+                        "WHERE a.id NOT IN (SELECT o.officialAddress.id FROM Organization o WHERE o.officialAddress IS NOT NULL) " +
+                        "AND a.id NOT IN (SELECT o.postalAddress.id FROM Organization o WHERE o.postalAddress IS NOT NULL)",
+                Address.class
+        ).getResultList();
     }
 
     public List<Address> getPage(Integer page, Integer size) {
