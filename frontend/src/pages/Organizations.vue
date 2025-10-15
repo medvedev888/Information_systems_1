@@ -3,7 +3,7 @@ import Table from "@/components/table.vue";
 import Header from "@/components/header.vue";
 import Button from "@/components/button.vue";
 
-import {markRaw, onMounted, reactive, ref, watch} from "vue";
+import {markRaw, onMounted, onBeforeUnmount, reactive, ref, watch} from "vue";
 import Pagination from "@/components/pagination.vue";
 import axios from "@/axios.js";
 
@@ -15,6 +15,7 @@ import Input from "@/components/input.vue";
 import Select from "@/components/select.vue";
 import FormUpdate from "@/components/forms/form-update.vue";
 
+// ----------------- состояние -----------------
 const page = ref(1);
 const totalPages = ref(1);
 const rows = reactive([]);
@@ -54,7 +55,9 @@ const columns = [
 
 let showTimer = null;
 let hideTimer = null;
+let eventSource = null; // для SSE
 
+// ----------------- функции UI -----------------
 function showDetails(data, event) {
   clearTimeout(hideTimer);
   showTimer = setTimeout(() => {
@@ -73,10 +76,10 @@ function hideDetails() {
   }, 100);
 }
 
+// ----------------- CRUD -----------------
 async function addRow(row) {
   try {
-    const res = await axios.post('/organizations', row);
-    await fetchOrganizations();
+    await axios.post('/organizations', row);
     showCreate.value = false;
   } catch (err) {
     console.error('Error saving organization:', err);
@@ -89,9 +92,8 @@ async function updateRow(row) {
     delete payload.operations;
     delete payload.creationDate;
 
-    const res = await axios.patch('/organizations', payload);
-    await fetchOrganizations();
-    showUpdate.value = false
+    await axios.patch('/organizations', payload);
+    showUpdate.value = false;
   } catch(err) {
     console.error('Error updating organization:', err);
   }
@@ -100,12 +102,12 @@ async function updateRow(row) {
 async function deleteRow(row) {
   try {
     await axios.delete(`/organizations/${row.id}`);
-    await fetchOrganizations();
   } catch (err) {
     console.error('Error deleting organization:', err);
   }
 }
 
+// ----------------- Modals -----------------
 function openCreateModal() {
   resetForm();
   showCreate.value = true;
@@ -115,9 +117,7 @@ function openCreateModal() {
 }
 
 async function openUpdateModal(row) {
-  form.value = {
-    ...row
-  }
+  form.value = { ...row }
 
   await fetchFreeCoordinates()
   if (row.coordinates) freeCoordinates.value.push(row.coordinates)
@@ -155,6 +155,7 @@ function resetForm() {
   }
 }
 
+// ----------------- Fetch -----------------
 async function fetchOrganizations() {
   try {
     const res = await axios.get(`/organizations?page=${page.value}&size=5`);
@@ -204,7 +205,32 @@ async function fetchFreeAddresses(type) {
   }
 }
 
-onMounted(fetchOrganizations);
+// ----------------- SSE -----------------
+onMounted(() => {
+  fetchOrganizations();
+  // подписка на SSE
+  const eventSource = new EventSource("http://localhost:8080/Lab_1-1.0-SNAPSHOT/api/events");
+
+  eventSource.addEventListener("ORGANIZATION_CREATED", () => {
+    fetchOrganizations();
+  });
+  eventSource.addEventListener("ORGANIZATION_UPDATED", () => {
+    fetchOrganizations();
+  });
+  eventSource.addEventListener("ORGANIZATION_DELETED", () => {
+    fetchOrganizations();
+  });
+});
+
+// закрываем SSE при размонтировании
+onBeforeUnmount(() => {
+  if(eventSource) {
+    eventSource.close();
+    eventSource = null;
+  }
+});
+
+// пагинация
 watch(page, fetchOrganizations);
 </script>
 
