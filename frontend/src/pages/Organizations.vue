@@ -3,7 +3,7 @@ import Table from "@/components/table.vue";
 import Header from "@/components/header.vue";
 import Button from "@/components/button.vue";
 
-import {markRaw, onMounted, onBeforeUnmount, reactive, ref, watch} from "vue";
+import {markRaw, onBeforeUnmount, onMounted, reactive, ref, watch} from "vue";
 import Pagination from "@/components/pagination.vue";
 import axios from "@/axios.js";
 
@@ -56,6 +56,17 @@ const columns = [
 let showTimer = null;
 let hideTimer = null;
 let eventSource = null; // для SSE
+const filterField = ref(null);
+const filterValue = ref('');
+const sortField = ref(null);
+const sortOrder = ref(null);
+
+const str_columns = [
+  {key: "name", label: "Name"},
+  {key: "fullName", label: "Full Name"},
+  {key: "type", label: "Type"}
+];
+
 
 // ----------------- функции UI -----------------
 function showDetails(data, event) {
@@ -88,13 +99,13 @@ async function addRow(row) {
 
 async function updateRow(row) {
   try {
-    const payload = { ...row };
+    const payload = {...row};
     delete payload.operations;
     delete payload.creationDate;
 
     await axios.patch('/organizations', payload);
     showUpdate.value = false;
-  } catch(err) {
+  } catch (err) {
     console.error('Error updating organization:', err);
   }
 }
@@ -117,7 +128,7 @@ function openCreateModal() {
 }
 
 async function openUpdateModal(row) {
-  form.value = { ...row }
+  form.value = {...row}
 
   await fetchFreeCoordinates()
   if (row.coordinates) freeCoordinates.value.push(row.coordinates)
@@ -158,7 +169,23 @@ function resetForm() {
 // ----------------- Fetch -----------------
 async function fetchOrganizations() {
   try {
-    const res = await axios.get(`/organizations?page=${page.value}&size=5`);
+    const params = new URLSearchParams({
+      page: page.value,
+      size: 5
+    });
+
+    if (filterField.value && filterValue.value) {
+      params.append('filterField', filterField.value.key);
+      params.append('filterValue', filterValue.value);
+    }
+
+    if (sortField.value && sortOrder.value) {
+      params.append('sortField', sortField.value);
+      params.append('sortOrder', sortOrder.value);
+    }
+
+    console.log(`/organizations?${params.toString()}`)
+    const res = await axios.get(`/organizations?${params.toString()}`);
     const orgs = res.data.data || [];
 
     orgs.forEach(row => {
@@ -224,14 +251,27 @@ onMounted(() => {
 
 // закрываем SSE при размонтировании
 onBeforeUnmount(() => {
-  if(eventSource) {
+  if (eventSource) {
     eventSource.close();
     eventSource = null;
   }
 });
 
-// пагинация
+// Сортировка
+function handleSortChanged({field, order}) {
+  sortField.value = field;
+  sortOrder.value = order;
+  fetchOrganizations();
+}
+
+// Пагинация
 watch(page, fetchOrganizations);
+
+// Фильтрация
+watch([filterField, filterValue], () => {
+  page.value = 1;
+});
+
 </script>
 
 <template>
@@ -240,9 +280,25 @@ watch(page, fetchOrganizations);
     <div class="table-container">
       <div class="table-header">
         <h2>Organizations</h2>
+        <div class="filter-container">
+          <Select
+            v-model="filterField"
+            :options="str_columns"
+            valueKey="key"
+            labelKey="label"
+          />
+          <Input v-model="filterValue" placeholder="Search string"></Input>
+          <Button label="Confirm" @click="fetchOrganizations"></Button>
+        </div>
         <Button label="Create" type="button" @click="openCreateModal"/>
       </div>
-      <Table :columns="columns" :rows="rows">
+      <Table :columns="columns"
+             :rows="rows"
+             :sort-field="sortField"
+             :sort-order="sortOrder"
+             @sortChanged="handleSortChanged"
+             :sortable-columns="['name', 'fullName', 'type']"
+      >
         <template #cell-coordinates="{ safeValue }">
           <div
             v-if="safeValue?.id"
@@ -460,6 +516,11 @@ h2, p {
   align-items: center;
   display: flex;
   flex-direction: row;
+  gap: 1rem;
+}
+
+.filter-container {
+  display: flex;
   gap: 1rem;
 }
 
