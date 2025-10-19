@@ -15,6 +15,7 @@ import Input from "@/components/input.vue";
 import Select from "@/components/select.vue";
 import FormUpdate from "@/components/forms/form-update.vue";
 import ErrorModal from "@/components/error-modal.vue";
+import {showErrorFromResponse} from "@/utils/error.js";
 
 // ----------------- состояние -----------------
 const page = ref(1);
@@ -69,6 +70,19 @@ const str_columns = [
 ];
 
 const errorModal = ref(null);
+const fieldLabels = {
+  id: "ID",
+  name: "Name",
+  coordinates: "Coordinates",
+  creationDate: "Creation Date",
+  officialAddress: "Official Address",
+  annualTurnover: "Annual Turnover",
+  employeesCount: "Employees Count",
+  rating: "Rating",
+  fullName: "Full Name",
+  type: "Type",
+  postalAddress: "Postal Address"
+};
 
 
 // ----------------- функции UI -----------------
@@ -96,7 +110,7 @@ async function addRow(row) {
     await axios.post('/organizations', row);
     showCreate.value = false;
   } catch (err) {
-    errorModal.value.show(err.response?.data || 'Error saving organization');
+    showErrorFromResponse(err, errorModal, fieldLabels);
   }
 }
 
@@ -109,7 +123,7 @@ async function updateRow(row) {
     await axios.patch('/organizations', payload);
     showUpdate.value = false;
   } catch (err) {
-    errorModal.value.show(err.response?.data || 'Error updating organization');
+    showErrorFromResponse(err, errorModal, fieldLabels);
   }
 }
 
@@ -117,7 +131,7 @@ async function deleteRow(row) {
   try {
     await axios.delete(`/organizations/${row.id}`);
   } catch (err) {
-    errorModal.value.show(err.response?.data || 'Error deleting organization');
+    showErrorFromResponse(err, errorModal, fieldLabels);
   }
 }
 
@@ -211,7 +225,7 @@ async function fetchOrganizations() {
     totalPages.value = res.data.totalPages ?? 1;
 
   } catch (err) {
-    errorModal.value.show(err.response?.data || 'Error fetching organizations');
+    showErrorFromResponse(err, errorModal, fieldLabels);
   }
 }
 
@@ -220,7 +234,7 @@ async function fetchFreeCoordinates() {
     const res = await axios.get('/organizations/free-coordinates');
     freeCoordinates.value = res.data || [];
   } catch (err) {
-    errorModal.value.show(err.response?.data || 'Error fetching free coordinates');
+    showErrorFromResponse(err, errorModal, fieldLabels);
   }
 }
 
@@ -230,7 +244,7 @@ async function fetchFreeAddresses(type) {
     if (type === 'official') freeOfficialAddresses.value = res.data || [];
     else if (type === 'postal') freePostalAddresses.value = res.data || [];
   } catch (err) {
-    errorModal.value.show(err.response?.data || 'Error fetching free addresses');
+    showErrorFromResponse(err, errorModal, fieldLabels);
   }
 }
 

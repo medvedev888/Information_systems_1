@@ -22,7 +22,7 @@ defineExpose({show});
   <div v-if="visible" class="modal-overlay" @click="close">
     <div class="modal" @click.stop>
       <h3>Error</h3>
-      <p>{{ message }}</p>
+      <p v-html="message.replace(/\n/g, '<br>')"></p>
       <Button label="Close" @click="close"/>
     </div>
   </div>

@@ -15,6 +15,7 @@ import Input from "@/components/input.vue";
 import Select from "@/components/select.vue";
 import FormUpdate from "@/components/forms/form-update.vue";
 import ErrorModal from "@/components/error-modal.vue";
+import { showErrorFromResponse } from '@/utils/error.js';
 
 // ----------------- состояние -----------------
 const page = ref(1);
@@ -50,6 +51,11 @@ const str_columns = [
 ];
 
 const errorModal = ref(null);
+const fieldLabels = {
+  id: "ID",
+  street: "Street",
+  town: "Town"
+};
 
 
 // ----------------- функции UI -----------------
@@ -77,7 +83,7 @@ async function addRow(row) {
     await axios.post('/addresses', row);
     showCreate.value = false;
   } catch (err) {
-    errorModal.value.show(err.response?.data || 'Error saving address');
+    showErrorFromResponse(err, errorModal, fieldLabels);
   }
 }
 
@@ -89,7 +95,7 @@ async function updateRow(row) {
     await axios.patch('/addresses', payload);
     showUpdate.value = false;
   } catch (err) {
-    errorModal.value.show(err.response?.data || 'Error updating address');
+    showErrorFromResponse(err, errorModal, fieldLabels);
   }
 }
 
@@ -97,7 +103,7 @@ async function deleteRow(row) {
   try {
     await axios.delete(`/addresses/${row.id}`);
   } catch (err) {
-    errorModal.value.show(err.response?.data || 'Error deleting address');
+    showErrorFromResponse(err, errorModal, fieldLabels);
   }
 }
 
@@ -157,7 +163,7 @@ async function fetchAddresses() {
     totalPages.value = res.data.totalPages ?? 1;
 
   } catch (err) {
-    errorModal.value.show(err.response?.data || 'Error fetching addresses');
+    showErrorFromResponse(err, errorModal, fieldLabels);
   }
 }
 
@@ -166,7 +172,7 @@ async function fetchFreeLocations() {
     const res = await axios.get('/addresses/free-locations');
     freeLocations.value = res.data || [];
   } catch (err) {
-    errorModal.value.show(err.response?.data || 'Error fetching free locations');
+    showErrorFromResponse(err, errorModal, fieldLabels);
   }
 }
 
