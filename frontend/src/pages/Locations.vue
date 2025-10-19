@@ -144,7 +144,10 @@ watch(page, fetchLocations);
         <h2>Locations</h2>
         <Button label="Create" type="button" @click="openCreateModal"/>
       </div>
-      <Table :columns="columns" :rows="rows"/>
+      <Table :columns="columns"
+             :rows="rows"
+             :sortable-columns="[]"
+      />
     </div>
     <Pagination v-model:pageNumber="page" :totalPages="totalPages"/>
   </div>
