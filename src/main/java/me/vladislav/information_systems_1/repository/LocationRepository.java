@@ -24,10 +24,6 @@ public class LocationRepository {
         return Optional.ofNullable(entityManager.find(Location.class, id));
     }
 
-    public List<Location> getAll() {
-        return entityManager.createQuery("SELECT l FROM Location l", Location.class).getResultList();
-    }
-
     public List<Location> getFreeLocations() {
         return entityManager.createQuery(
                 "SELECT l FROM Location l WHERE l NOT IN " +

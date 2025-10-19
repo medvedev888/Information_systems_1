@@ -23,12 +23,6 @@ public class OrganizationRepository {
             "type", "type"
     );
 
-    public long count() {
-        return entityManager
-                .createQuery("SELECT COUNT(o) FROM Organization o", Long.class)
-                .getSingleResult();
-    }
-
     public Optional<Organization> getById(Integer id) {
         return Optional.ofNullable(entityManager.find(Organization.class, id));
     }

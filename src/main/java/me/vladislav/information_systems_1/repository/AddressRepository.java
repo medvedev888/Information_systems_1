@@ -24,10 +24,6 @@ public class AddressRepository {
         return Optional.ofNullable(entityManager.find(Address.class, id));
     }
 
-    public List<Address> getAll() {
-        return entityManager.createQuery("SELECT a FROM Address a", Address.class).getResultList();
-    }
-
     public List<Address> getFreeAddresses() {
         return entityManager.createQuery(
                 "SELECT a FROM Address a " +
