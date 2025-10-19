@@ -32,12 +32,17 @@ public class AddressService {
     private LocationMapper locationMapper;
 
     @Transactional
-    public PageResponse<AddressDTO> getPage(Integer page, Integer size) {
-        List<AddressDTO> addresses = addressRepository.getPage(page, size).stream()
+    public PageResponse<AddressDTO> getPage(Integer page,
+                                            Integer size,
+                                            String filterField,
+                                            String filterValue,
+                                            String sortField,
+                                            String sortOrder) {
+        List<AddressDTO> addresses = addressRepository.getPage(page, size, filterField, filterValue, sortField, sortOrder)
+                .stream()
                 .map(addressMapper::toDTO)
                 .toList();
-        ;
-        long totalCount = addressRepository.count();
+        long totalCount = addressRepository.countWithFilter(filterField, filterValue);
         Integer totalPages = (int) Math.ceil((double) totalCount / size);
         return new PageResponse<>(addresses, totalPages);
     }

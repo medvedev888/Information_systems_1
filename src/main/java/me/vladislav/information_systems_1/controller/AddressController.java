@@ -27,8 +27,21 @@ public class AddressController {
     private EventService eventService;
 
     @GET
-    public Response getPage(@QueryParam("page") Integer page, @QueryParam("size") Integer size) {
-        PageResponse<AddressDTO> response = addressService.getPage(page, size);
+    public Response getPage(@QueryParam("page") Integer pageParam,
+                            @QueryParam("size") Integer sizeParam,
+                            @QueryParam("filterField") String filterFieldParam,
+                            @QueryParam("filterValue") String filterValueParam,
+                            @QueryParam("sortField") String sortFieldParam,
+                            @QueryParam("sortOrder") String sortOrderParam
+    ) {
+        int page = (pageParam == null || pageParam < 1) ? 1 : pageParam;
+        int size = (sizeParam == null || sizeParam < 1) ? 5 : sizeParam;
+        String filterField = (filterFieldParam == null) ? null : filterFieldParam.trim();
+        String filterValue = (filterValueParam == null) ? null : filterValueParam.trim();
+        String sortField = (sortFieldParam == null) ? null : sortFieldParam.trim();
+        String sortOrder = (sortOrderParam == null) ? "asc" : sortOrderParam.trim().toLowerCase();
+
+        PageResponse<AddressDTO> response = addressService.getPage(page, size, filterField, filterValue, sortField, sortOrder);
         return Response.ok(response).build();
     }
 

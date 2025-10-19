@@ -41,12 +41,19 @@ public class OrganizationService {
     private CoordinatesMapper coordinatesMapper;
 
     @Transactional
-    public PageResponse<OrganizationDTO> getPage(Integer page, Integer size) {
-        List<OrganizationDTO> organizations = organizationRepository.getPage(page, size).stream()
+    public PageResponse<OrganizationDTO> getPage(Integer page,
+                                                 Integer size,
+                                                 String filterField,
+                                                 String filterValue,
+                                                 String sortField,
+                                                 String sortOrder) {
+        List<OrganizationDTO> organizations = organizationRepository.getPage(page, size, filterField, filterValue, sortField, sortOrder)
+                .stream()
                 .map(organizationMapper::toDTO)
                 .toList();
-        long totalCount = organizationRepository.count();
+        long totalCount = organizationRepository.countWithFilter(filterField, filterValue);
         Integer totalPages = (int) Math.ceil((double) totalCount / size);
+
         return new PageResponse<>(organizations, totalPages);
     }
 

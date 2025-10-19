@@ -24,10 +24,6 @@ public class CoordinatesRepository {
         return Optional.ofNullable(entityManager.find(Coordinates.class, id));
     }
 
-    public List<Coordinates> getAll() {
-        return entityManager.createQuery("SELECT c FROM Coordinates c", Coordinates.class).getResultList();
-    }
-
     public List<Coordinates> getFreeCoordinates() {
         return entityManager.createQuery(
                         "SELECT c FROM Coordinates c WHERE c NOT IN " +
