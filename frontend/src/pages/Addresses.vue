@@ -39,6 +39,14 @@ const columns = [
 let showTimer = null;
 let hideTimer = null;
 let eventSource = null; // для SSE
+const filterField = ref(null);
+const filterValue = ref('');
+const sortField = ref(null);
+const sortOrder = ref(null);
+
+const str_columns = [
+  {key: "street", label: "Street"}
+];
 
 // ----------------- функции UI -----------------
 function showDetails(data, event) {
@@ -116,7 +124,22 @@ function resetForm() {
 // ----------------- Fetch -----------------
 async function fetchAddresses() {
   try {
-    const res = await axios.get(`/addresses?page=${page.value}&size=8`);
+    const params = new URLSearchParams({
+      page: page.value,
+      size: 8
+    });
+
+    if (filterField.value && filterValue.value) {
+      params.append('filterField', filterField.value.key);
+      params.append('filterValue', filterValue.value);
+    }
+
+    if (sortField.value && sortOrder.value) {
+      params.append('sortField', sortField.value);
+      params.append('sortOrder', sortOrder.value);
+    }
+
+    const res = await axios.get(`/addresses?${params.toString()}`);
     const addresses = res.data.data || [];
 
     addresses.forEach(row => {
@@ -168,8 +191,21 @@ onBeforeUnmount(() => {
   }
 });
 
+// Сортировка
+function handleSortChanged({field, order}) {
+  sortField.value = field;
+  sortOrder.value = order;
+  fetchAddresses();
+}
+
 // пагинация
 watch(page, fetchAddresses);
+
+// Фильтрация
+watch([filterField, filterValue], () => {
+  page.value = 1;
+});
+
 </script>
 
 <template>
@@ -178,9 +214,25 @@ watch(page, fetchAddresses);
     <div class="table-container">
       <div class="table-header">
         <h2>Addresses</h2>
+        <div class="filter-container">
+          <Select
+            v-model="filterField"
+            :options="str_columns"
+            valueKey="key"
+            labelKey="label"
+          />
+          <Input v-model="filterValue" placeholder="Search string"></Input>
+          <Button label="Confirm" @click="fetchAddresses"></Button>
+        </div>
         <Button label="Create" type="button" @click="openCreateModal"/>
       </div>
-      <Table :columns="columns" :rows="rows">
+      <Table :columns="columns"
+             :rows="rows"
+             :sort-field="sortField"
+             :sort-order="sortOrder"
+             @sortChanged="handleSortChanged"
+             :sortable-columns="['street']"
+      >
         <template #cell-town="{ safeValue }">
           <div
             v-if="safeValue?.id"
@@ -306,6 +358,11 @@ h2, p {
   align-items: center;
   display: flex;
   flex-direction: row;
+  gap: 1rem;
+}
+
+.filter-container {
+  display: flex;
   gap: 1rem;
 }
 

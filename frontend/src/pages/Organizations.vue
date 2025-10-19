@@ -184,11 +184,10 @@ async function fetchOrganizations() {
       params.append('sortOrder', sortOrder.value);
     }
 
-    console.log(`/organizations?${params.toString()}`)
     const res = await axios.get(`/organizations?${params.toString()}`);
-    const orgs = res.data.data || [];
+    const organizations = res.data.data || [];
 
-    orgs.forEach(row => {
+    organizations.forEach(row => {
       if (row.creationDate) {
         row.creationDate = new Date(row.creationDate).toLocaleString('ru-RU', {
           day: '2-digit',
@@ -205,7 +204,7 @@ async function fetchOrganizations() {
       ];
     });
 
-    rows.splice(0, rows.length, ...orgs);
+    rows.splice(0, rows.length, ...organizations);
     totalPages.value = res.data.totalPages ?? 1;
 
   } catch (err) {
