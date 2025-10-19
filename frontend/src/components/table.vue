@@ -1,13 +1,21 @@
 <script setup>
-import {defineEmits, defineProps} from "vue";
+import {defineEmits, defineProps, ref} from "vue";
 import Button from "@/components/button.vue";
+import UpArrow from "@/assets/upArrow.svg?component";
+import DownArrow from "@/assets/downArrow.svg?component";
+
+const sortField = ref(null);
+const sortOrder = ref(null); // 'asc' | 'desc' | null
 
 const props = defineProps({
   columns: Array,
-  rows: Array
+  rows: Array,
+  sortField: String,
+  sortOrder: String,
+  sortableColumns: Array
 });
 
-const emit = defineEmits(["rowClick"]);
+const emit = defineEmits(["rowClick", "sortChanged"]);
 
 function formatCellValue(value) {
   if (value === null || value === undefined) {
@@ -44,13 +52,42 @@ function formatCellValue(value) {
 
   return {display: String(value), safe: value};
 }
+
+// Сортировка по столбцу
+function toggleSort(key) {
+  if (!props.sortableColumns.includes(key)) return;
+  if (sortField.value === key) {
+    if (sortOrder.value === 'asc') sortOrder.value = 'desc';
+    else if (sortOrder.value === 'desc') {
+      sortField.value = null;
+      sortOrder.value = null;
+    } else sortOrder.value = 'asc';
+  } else {
+    sortField.value = key;
+    sortOrder.value = 'asc';
+  }
+  emit('sortChanged', {field: sortField.value, order: sortOrder.value});
+}
+
 </script>
 
 <template>
   <table class="table">
     <thead>
     <tr class="header-row">
-      <th v-for="col in columns" :key="col.key">{{ col.label }}</th>
+      <th v-for="col in columns"
+          :key="col.key"
+          :class="{ sortable: sortableColumns.includes(col.key) }"
+          @click="toggleSort(col.key)">
+        <div class="th-content">
+          <span>{{ col.label }}</span>
+          <component
+            v-if="sortField === col.key && sortOrder"
+            :is="sortOrder === 'asc' ? UpArrow : DownArrow"
+            class="sort-icon"
+          />
+        </div>
+      </th>
     </tr>
     </thead>
     <tbody>
@@ -122,4 +159,24 @@ td Button {
   gap: 0.2rem;
   justify-content: center;
 }
+
+.th-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.sort-icon {
+  width: 1.0rem;
+  height: 1.0rem;;
+}
+
+th.sortable {
+  cursor: pointer;
+}
+
+th.sortable:hover {
+  background: rgba(79, 70, 229, 0.3);
+}
+
 </style>
