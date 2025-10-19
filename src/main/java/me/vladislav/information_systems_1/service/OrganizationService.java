@@ -41,7 +41,9 @@ public class OrganizationService {
     private CoordinatesMapper coordinatesMapper;
 
     @Transactional
-    public PageResponse<OrganizationDTO> getPage(Integer page, Integer size, String filterField,
+    public PageResponse<OrganizationDTO> getPage(Integer page,
+                                                 Integer size,
+                                                 String filterField,
                                                  String filterValue,
                                                  String sortField,
                                                  String sortOrder) {

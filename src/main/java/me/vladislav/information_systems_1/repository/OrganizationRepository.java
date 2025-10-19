@@ -65,13 +65,14 @@ public class OrganizationRepository {
         boolean hasFilter = filterField != null && ALLOWED_FIELDS.containsKey(filterField)
                 && filterValue != null && !filterValue.isBlank();
 
-        var query = entityManager.createQuery(jpql.toString(), Long.class);
-
         if (hasFilter) {
             jpql.append(" WHERE LOWER(o.")
                     .append(ALLOWED_FIELDS.get(filterField))
                     .append(") LIKE :value");
-            query = entityManager.createQuery(jpql.toString(), Long.class);
+        }
+
+        var query = entityManager.createQuery(jpql.toString(), Long.class);
+        if (hasFilter) {
             query.setParameter("value", "%" + filterValue.toLowerCase() + "%");
         }
 
