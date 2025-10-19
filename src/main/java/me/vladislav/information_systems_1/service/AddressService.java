@@ -8,6 +8,7 @@ import me.vladislav.information_systems_1.dto.LocationDTO;
 import me.vladislav.information_systems_1.dto.PageResponse;
 import me.vladislav.information_systems_1.exception.AddressNotFoundException;
 import me.vladislav.information_systems_1.exception.LocationNotFoundException;
+import me.vladislav.information_systems_1.exception.RelatedEntityDeletionException;
 import me.vladislav.information_systems_1.mapper.AddressMapper;
 import me.vladislav.information_systems_1.mapper.LocationMapper;
 import me.vladislav.information_systems_1.model.Address;
@@ -103,6 +104,10 @@ public class AddressService {
     public AddressDTO delete(Long id) {
         Address address = addressRepository.getById(id)
                 .orElseThrow(() -> new AddressNotFoundException("Address not found"));
+
+        if (addressRepository.getFreeAddresses().stream().noneMatch(a -> a.getId().equals(id))) {
+            throw new RelatedEntityDeletionException("Address is used by an organization");
+        }
         addressRepository.delete(address);
 
         AddressDTO addressDTO = new AddressDTO();

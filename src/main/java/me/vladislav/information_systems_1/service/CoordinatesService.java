@@ -6,6 +6,7 @@ import jakarta.transaction.Transactional;
 import me.vladislav.information_systems_1.dto.CoordinatesDTO;
 import me.vladislav.information_systems_1.dto.PageResponse;
 import me.vladislav.information_systems_1.exception.CoordinatesNotFoundException;
+import me.vladislav.information_systems_1.exception.RelatedEntityDeletionException;
 import me.vladislav.information_systems_1.mapper.CoordinatesMapper;
 import me.vladislav.information_systems_1.model.Coordinates;
 import me.vladislav.information_systems_1.repository.CoordinatesRepository;
@@ -61,6 +62,10 @@ public class CoordinatesService {
     public CoordinatesDTO delete(Long id) {
         Coordinates coordinates = coordinatesRepository.getById(id)
                 .orElseThrow(() -> new CoordinatesNotFoundException("Coordinates not found"));
+
+        if (coordinatesRepository.getFreeCoordinates().stream().noneMatch(c -> c.getId().equals(id))) {
+            throw new RelatedEntityDeletionException("Coordinates is used by an organization");
+        }
         coordinatesRepository.delete(coordinates);
 
         CoordinatesDTO coordinatesDTO = new CoordinatesDTO();

@@ -12,6 +12,13 @@ public class GlobalExceptionHandler implements ExceptionMapper<RuntimeException>
 
     @Override
     public Response toResponse(RuntimeException exception) {
+
+        if (exception instanceof RelatedEntityDeletionException) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(Map.of("success", false, "message", exception.getMessage()))
+                    .build();
+        }
+
         if (exception instanceof InvalidCredentialsException
                 || exception instanceof UserNotFoundException) {
             return Response.status(Response.Status.UNAUTHORIZED)

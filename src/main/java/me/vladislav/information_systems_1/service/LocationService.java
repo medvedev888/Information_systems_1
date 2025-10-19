@@ -6,6 +6,7 @@ import jakarta.transaction.Transactional;
 import me.vladislav.information_systems_1.dto.LocationDTO;
 import me.vladislav.information_systems_1.dto.PageResponse;
 import me.vladislav.information_systems_1.exception.LocationNotFoundException;
+import me.vladislav.information_systems_1.exception.RelatedEntityDeletionException;
 import me.vladislav.information_systems_1.mapper.LocationMapper;
 import me.vladislav.information_systems_1.model.Location;
 import me.vladislav.information_systems_1.repository.LocationRepository;
@@ -66,6 +67,10 @@ public class LocationService {
     public LocationDTO delete(Long id) {
         Location location = locationRepository.getById(id)
                 .orElseThrow(() -> new LocationNotFoundException("Location not found"));
+
+        if (locationRepository.getFreeLocations().stream().noneMatch(l -> l.getId().equals(id))) {
+            throw new RelatedEntityDeletionException("Location is used by an address");
+        }
         locationRepository.delete(location);
 
         LocationDTO locationDTO = new LocationDTO();
