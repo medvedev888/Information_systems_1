@@ -14,6 +14,7 @@ import FormCreate from "@/components/forms/form-create.vue";
 import Input from "@/components/input.vue";
 import Select from "@/components/select.vue";
 import FormUpdate from "@/components/forms/form-update.vue";
+import ErrorModal from "@/components/error-modal.vue";
 
 // ----------------- состояние -----------------
 const page = ref(1);
@@ -67,6 +68,8 @@ const str_columns = [
   {key: "type", label: "Type"}
 ];
 
+const errorModal = ref(null);
+
 
 // ----------------- функции UI -----------------
 function showDetails(data, event) {
@@ -93,7 +96,7 @@ async function addRow(row) {
     await axios.post('/organizations', row);
     showCreate.value = false;
   } catch (err) {
-    console.error('Error saving organization:', err);
+    errorModal.value.show(err.response?.data || 'Error saving organization');
   }
 }
 
@@ -106,7 +109,7 @@ async function updateRow(row) {
     await axios.patch('/organizations', payload);
     showUpdate.value = false;
   } catch (err) {
-    console.error('Error updating organization:', err);
+    errorModal.value.show(err.response?.data || 'Error updating organization');
   }
 }
 
@@ -114,7 +117,7 @@ async function deleteRow(row) {
   try {
     await axios.delete(`/organizations/${row.id}`);
   } catch (err) {
-    console.error('Error deleting organization:', err);
+    errorModal.value.show(err.response?.data || 'Error deleting organization');
   }
 }
 
@@ -208,7 +211,7 @@ async function fetchOrganizations() {
     totalPages.value = res.data.totalPages ?? 1;
 
   } catch (err) {
-    console.error("Error fetching organizations:", err);
+    errorModal.value.show(err.response?.data || 'Error fetching organizations');
   }
 }
 
@@ -217,7 +220,7 @@ async function fetchFreeCoordinates() {
     const res = await axios.get('/organizations/free-coordinates');
     freeCoordinates.value = res.data || [];
   } catch (err) {
-    console.error(err);
+    errorModal.value.show(err.response?.data || 'Error fetching free coordinates');
   }
 }
 
@@ -227,7 +230,7 @@ async function fetchFreeAddresses(type) {
     if (type === 'official') freeOfficialAddresses.value = res.data || [];
     else if (type === 'postal') freePostalAddresses.value = res.data || [];
   } catch (err) {
-    console.error(err);
+    errorModal.value.show(err.response?.data || 'Error fetching free addresses');
   }
 }
 
@@ -462,6 +465,9 @@ watch([filterField, filterValue], () => {
       <Input v-model.number="form.rating" type="number" placeholder="Rating"/>
     </div>
   </FormUpdate>
+
+  <!--  Error Modal  -->
+  <ErrorModal ref="errorModal"/>
 
 </template>
 

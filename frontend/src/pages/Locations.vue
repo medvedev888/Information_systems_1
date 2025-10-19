@@ -12,6 +12,7 @@ import DeleteIcon from '@/assets/deleteIcon.svg?component'
 import FormCreate from "@/components/forms/form-create.vue";
 import Input from "@/components/input.vue";
 import FormUpdate from "@/components/forms/form-update.vue";
+import ErrorModal from "@/components/error-modal.vue";
 
 // ----------------- состояние -----------------
 const page = ref(1);
@@ -36,13 +37,16 @@ const columns = [
 
 let eventSource = null; // для SSE
 
+const errorModal = ref(null);
+
+
 // ----------------- CRUD -----------------
 async function addRow(row) {
   try {
     await axios.post('/locations', row);
     showCreate.value = false;
   } catch (err) {
-    console.error('Error saving location:', err);
+    errorModal.value.show(err.response?.data || 'Error saving location');
   }
 }
 
@@ -54,7 +58,7 @@ async function updateRow(row) {
     await axios.patch('/locations', payload);
     showUpdate.value = false;
   } catch (err) {
-    console.error('Error updating location:', err);
+    errorModal.value.show(err.response?.data || 'Error updating location');
   }
 }
 
@@ -62,7 +66,7 @@ async function deleteRow(row) {
   try {
     await axios.delete(`/locations/${row.id}`);
   } catch (err) {
-    console.error('Error deleting location:', err);
+    errorModal.value.show(err.response?.data || 'Error deleting location');
   }
 }
 
@@ -103,7 +107,7 @@ async function fetchLocations() {
     totalPages.value = res.data.totalPages ?? 1;
 
   } catch (err) {
-    console.error("Error fetching locations:", err);
+    errorModal.value.show(err.response?.data || 'Error fetching locations');
   }
 }
 
@@ -210,6 +214,9 @@ watch(page, fetchLocations);
     </div>
 
   </FormUpdate>
+
+  <!--  Error Modal  -->
+  <ErrorModal ref="errorModal"/>
 
 </template>
 

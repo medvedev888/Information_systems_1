@@ -12,6 +12,7 @@ import DeleteIcon from '@/assets/deleteIcon.svg?component'
 import FormCreate from "@/components/forms/form-create.vue";
 import Input from "@/components/input.vue";
 import FormUpdate from "@/components/forms/form-update.vue";
+import ErrorModal from "@/components/error-modal.vue";
 
 // ----------------- состояние -----------------
 const page = ref(1);
@@ -34,13 +35,16 @@ const columns = [
 
 let eventSource = null; // для SSE
 
+const errorModal = ref(null);
+
+
 // ----------------- CRUD -----------------
 async function addRow(row) {
   try {
     await axios.post('/coordinates', row);
     showCreate.value = false;
   } catch (err) {
-    console.error('Error saving coordinates:', err);
+    errorModal.value.show(err.response?.data || 'Error saving coordinates');
   }
 }
 
@@ -52,7 +56,7 @@ async function updateRow(row) {
     await axios.patch('/coordinates', payload);
     showUpdate.value = false;
   } catch (err) {
-    console.error('Error updating coordinates:', err);
+    errorModal.value.show(err.response?.data || 'Error updating coordinates');
   }
 }
 
@@ -60,7 +64,7 @@ async function deleteRow(row) {
   try {
     await axios.delete(`/coordinates/${row.id}`);
   } catch (err) {
-    console.error('Error deleting coordinates:', err);
+    errorModal.value.show(err.response?.data || 'Error deleting coordinates');
   }
 }
 
@@ -100,7 +104,7 @@ async function fetchCoordinates() {
     totalPages.value = res.data.totalPages ?? 1;
 
   } catch (err) {
-    console.error("Error fetching coordinates:", err);
+    errorModal.value.show(err.response?.data || 'Error fetching coordinates');
   }
 }
 
@@ -197,6 +201,9 @@ watch(page, fetchCoordinates);
     </div>
 
   </FormUpdate>
+
+  <!--  Error Modal  -->
+  <ErrorModal ref="errorModal"/>
 
 </template>
 

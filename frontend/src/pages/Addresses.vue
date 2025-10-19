@@ -14,6 +14,7 @@ import FormCreate from "@/components/forms/form-create.vue";
 import Input from "@/components/input.vue";
 import Select from "@/components/select.vue";
 import FormUpdate from "@/components/forms/form-update.vue";
+import ErrorModal from "@/components/error-modal.vue";
 
 // ----------------- состояние -----------------
 const page = ref(1);
@@ -48,6 +49,9 @@ const str_columns = [
   {key: "street", label: "Street"}
 ];
 
+const errorModal = ref(null);
+
+
 // ----------------- функции UI -----------------
 function showDetails(data, event) {
   clearTimeout(hideTimer);
@@ -73,19 +77,19 @@ async function addRow(row) {
     await axios.post('/addresses', row);
     showCreate.value = false;
   } catch (err) {
-    console.error('Error saving address:', err);
+    errorModal.value.show(err.response?.data || 'Error saving address');
   }
 }
 
 async function updateRow(row) {
   try {
-    const payload = { ...row };
+    const payload = {...row};
     delete payload.operations;
 
     await axios.patch('/addresses', payload);
     showUpdate.value = false;
-  } catch(err) {
-    console.error('Error updating address:', err);
+  } catch (err) {
+    errorModal.value.show(err.response?.data || 'Error updating address');
   }
 }
 
@@ -93,7 +97,7 @@ async function deleteRow(row) {
   try {
     await axios.delete(`/addresses/${row.id}`);
   } catch (err) {
-    console.error('Error deleting address:', err);
+    errorModal.value.show(err.response?.data || 'Error deleting address');
   }
 }
 
@@ -105,7 +109,7 @@ function openCreateModal() {
 }
 
 async function openUpdateModal(row) {
-  form.value = { ...row }
+  form.value = {...row}
 
   await fetchFreeLocations()
   if (row.town) freeLocations.value.push(row.town)
@@ -153,7 +157,7 @@ async function fetchAddresses() {
     totalPages.value = res.data.totalPages ?? 1;
 
   } catch (err) {
-    console.error("Error fetching addresses:", err);
+    errorModal.value.show(err.response?.data || 'Error fetching addresses');
   }
 }
 
@@ -162,7 +166,7 @@ async function fetchFreeLocations() {
     const res = await axios.get('/addresses/free-locations');
     freeLocations.value = res.data || [];
   } catch (err) {
-    console.error(err);
+    errorModal.value.show(err.response?.data || 'Error fetching free locations');
   }
 }
 
@@ -185,7 +189,7 @@ onMounted(() => {
 
 // закрываем SSE при размонтировании
 onBeforeUnmount(() => {
-  if(eventSource) {
+  if (eventSource) {
     eventSource.close();
     eventSource = null;
   }
@@ -305,6 +309,9 @@ watch([filterField, filterValue], () => {
     </div>
 
   </FormUpdate>
+
+  <!--  Error Modal  -->
+  <ErrorModal ref="errorModal"/>
 
 </template>
 
