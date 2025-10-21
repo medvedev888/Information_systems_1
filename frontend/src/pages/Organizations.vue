@@ -263,6 +263,12 @@ onMounted(() => {
   eventSource.addEventListener("ORGANIZATION_DELETED", () => {
     fetchOrganizations();
   });
+  eventSource.addEventListener("ORGANIZATION_MERGED", () => {
+    fetchOrganizations();
+  });
+  eventSource.addEventListener("ORGANIZATION_ABSORBED", () => {
+    fetchOrganizations();
+  });
 });
 
 // закрываем SSE при размонтировании
