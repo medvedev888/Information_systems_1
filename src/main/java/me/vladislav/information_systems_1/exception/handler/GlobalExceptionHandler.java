@@ -13,7 +13,8 @@ public class GlobalExceptionHandler implements ExceptionMapper<RuntimeException>
     @Override
     public Response toResponse(RuntimeException exception) {
 
-        if (exception instanceof RelatedEntityDeletionException) {
+        if (exception instanceof RelatedEntityDeletionException
+                || exception instanceof IllegalArgumentException) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(Map.of("success", false, "message", exception.getMessage()))
                     .build();
