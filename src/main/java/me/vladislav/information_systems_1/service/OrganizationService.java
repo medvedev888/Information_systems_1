@@ -3,7 +3,10 @@ package me.vladislav.information_systems_1.service;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import me.vladislav.information_systems_1.dto.*;
+import me.vladislav.information_systems_1.dto.AddressDTO;
+import me.vladislav.information_systems_1.dto.CoordinatesDTO;
+import me.vladislav.information_systems_1.dto.OrganizationDTO;
+import me.vladislav.information_systems_1.dto.PageResponse;
 import me.vladislav.information_systems_1.exception.AddressNotFoundException;
 import me.vladislav.information_systems_1.exception.CoordinatesNotFoundException;
 import me.vladislav.information_systems_1.exception.OrganizationNotFoundException;
@@ -212,12 +215,10 @@ public class OrganizationService {
     // 4) Объединить организации
     @Transactional
     public OrganizationDTO mergeCreateNew(OrganizationDTO org1Dto, OrganizationDTO org2Dto, String name, AddressDTO officialAddress) {
-        System.out.println("Service is work!");
         Integer organizationID = organizationRepository.mergeOrganizations(org1Dto.getId(), org2Dto.getId(), name, officialAddress.getId());
-        System.out.println("org id = " + organizationID);
         return organizationMapper
                 .toDTO(organizationRepository.getById(organizationID)
-                .orElseThrow(() -> new OrganizationNotFoundException("Organization not found after merge, id=" + organizationID)));
+                        .orElseThrow(() -> new OrganizationNotFoundException("Organization not found after merge, id=" + organizationID)));
     }
 
     // 5) Поглощение одной организацией другой

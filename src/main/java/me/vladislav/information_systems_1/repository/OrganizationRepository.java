@@ -109,7 +109,6 @@ public class OrganizationRepository {
 
     // 4) Merge
     public Integer mergeOrganizations(Integer org1Id, Integer org2Id, String newName, Long officialAddressId) {
-        System.out.println("Repository is work!");
         entityManager.createNativeQuery(
                         "SELECT merge_organizations(:org1Id, :org2Id, :newName, :officialAddressId)")
                 .setParameter("org1Id", org1Id)
