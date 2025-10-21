@@ -71,7 +71,6 @@ public class OrganizationOperationsController {
         if (request.organization1.getId().equals(request.organization2.getId())) {
             throw new IllegalArgumentException("First organization and second organization must be different");
         }
-        System.out.println("Controller is work!");
         OrganizationDTO newOrganization = organizationService.mergeCreateNew(request.organization1,
                 request.organization2,
                 request.name,
