@@ -4,7 +4,6 @@ package me.vladislav.information_systems_1.repository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import me.vladislav.information_systems_1.model.Location;
 import me.vladislav.information_systems_1.model.Organization;
 
 import java.util.List;
@@ -86,4 +85,48 @@ public class OrganizationRepository {
     public void delete(Organization organization) {
         entityManager.remove(organization);
     }
+
+    // 1) Количество организаций с rating < заданного
+    public long countByRatingLessThan(Double rating) {
+        Object result = entityManager.createNativeQuery("SELECT count_organizations_by_rating(:rating)")
+                .setParameter("rating", rating)
+                .getSingleResult();
+        return ((Number) result).longValue();
+    }
+
+    // 2) Массив организаций по type
+    public List<Organization> findByType(String type) {
+        return entityManager.createNativeQuery("SELECT * FROM get_organizations_by_type(:type)", Organization.class)
+                .setParameter("type", type)
+                .getResultList();
+    }
+
+    // 3) Уникальные fullName
+    public List<String> findDistinctFullNames() {
+        return entityManager.createNativeQuery("SELECT * FROM get_unique_fullnames()")
+                .getResultList();
+    }
+
+    // 4) Merge
+    public Integer mergeOrganizations(Integer org1Id, Integer org2Id, String newName, Long officialAddressId) {
+        System.out.println("Repository is work!");
+        entityManager.createNativeQuery(
+                        "SELECT merge_organizations(:org1Id, :org2Id, :newName, :officialAddressId)")
+                .setParameter("org1Id", org1Id)
+                .setParameter("org2Id", org2Id)
+                .setParameter("newName", newName)
+                .setParameter("officialAddressId", officialAddressId)
+                .getResultList();
+        return org1Id;
+    }
+
+
+    // 5) Absorb
+    public void absorbOrganization(Integer acquirerId, Integer victimId) {
+        entityManager.createNativeQuery("SELECT absorb_organization(:acquirerId, :victimId)")
+                .setParameter("acquirerId", acquirerId)
+                .setParameter("victimId", victimId)
+                .getResultList();
+    }
+
 }
