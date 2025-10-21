@@ -13,6 +13,7 @@ import me.vladislav.information_systems_1.mapper.OrganizationMapper;
 import me.vladislav.information_systems_1.model.Address;
 import me.vladislav.information_systems_1.model.Coordinates;
 import me.vladislav.information_systems_1.model.Organization;
+import me.vladislav.information_systems_1.model.OrganizationType;
 import me.vladislav.information_systems_1.repository.AddressRepository;
 import me.vladislav.information_systems_1.repository.CoordinatesRepository;
 import me.vladislav.information_systems_1.repository.OrganizationRepository;
@@ -187,5 +188,41 @@ public class OrganizationService {
         OrganizationDTO organizationDTO = new OrganizationDTO();
         organizationDTO.setId(id);
         return organizationDTO;
+    }
+
+
+    // 1) Количество организаций с rating < заданного
+    public long countByRating(Double rating) {
+        return organizationRepository.countByRatingLessThan(rating);
+    }
+
+    // 2) Получить массив организаций по type
+    public List<OrganizationDTO> getByType(OrganizationType type) {
+        return organizationRepository.findByType(type.name())
+                .stream()
+                .map(organizationMapper::toDTO)
+                .toList();
+    }
+
+    // 3) Уникальные fullName
+    public List<String> getUniqueFullNames() {
+        return organizationRepository.findDistinctFullNames();
+    }
+
+    // 4) Объединить организации
+    @Transactional
+    public OrganizationDTO mergeCreateNew(OrganizationDTO org1Dto, OrganizationDTO org2Dto, String name, AddressDTO officialAddress) {
+        System.out.println("Service is work!");
+        Integer organizationID = organizationRepository.mergeOrganizations(org1Dto.getId(), org2Dto.getId(), name, officialAddress.getId());
+        System.out.println("org id = " + organizationID);
+        return organizationMapper
+                .toDTO(organizationRepository.getById(organizationID)
+                .orElseThrow(() -> new OrganizationNotFoundException("Organization not found after merge, id=" + organizationID)));
+    }
+
+    // 5) Поглощение одной организацией другой
+    @Transactional
+    public void absorbOrganization(OrganizationDTO acquirerDto, OrganizationDTO victimDto) {
+        organizationRepository.absorbOrganization(acquirerDto.getId(), victimDto.getId());
     }
 }
