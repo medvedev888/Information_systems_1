@@ -1,5 +1,15 @@
 
 export function showErrorFromResponse(err, modal, fieldLabels) {
+
+  if (typeof err === 'string') {
+    modal.value.show(err);
+    return;
+  }
+  if (err instanceof Error) {
+    modal.value.show(err.message);
+    return;
+  }
+
   const data = err.response?.data;
   if (data?.errors) {
     const text = Object.entries(data.errors)
