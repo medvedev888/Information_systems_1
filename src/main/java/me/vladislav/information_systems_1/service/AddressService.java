@@ -9,8 +9,7 @@ import me.vladislav.information_systems_1.dto.PageResponse;
 import me.vladislav.information_systems_1.exception.AddressNotFoundException;
 import me.vladislav.information_systems_1.exception.LocationNotFoundException;
 import me.vladislav.information_systems_1.exception.RelatedEntityDeletionException;
-import me.vladislav.information_systems_1.mapper.AddressMapper;
-import me.vladislav.information_systems_1.mapper.LocationMapper;
+import me.vladislav.information_systems_1.mapper.EntityMapper;
 import me.vladislav.information_systems_1.model.Address;
 import me.vladislav.information_systems_1.model.Location;
 import me.vladislav.information_systems_1.repository.AddressRepository;
@@ -27,10 +26,7 @@ public class AddressService {
     private LocationRepository locationRepository;
 
     @Inject
-    private AddressMapper addressMapper;
-
-    @Inject
-    private LocationMapper locationMapper;
+    private EntityMapper entityMapper;
 
     @Transactional
     public PageResponse<AddressDTO> getPage(Integer page,
@@ -41,7 +37,7 @@ public class AddressService {
                                             String sortOrder) {
         List<AddressDTO> addresses = addressRepository.getPage(page, size, filterField, filterValue, sortField, sortOrder)
                 .stream()
-                .map(addressMapper::toDTO)
+                .map(entityMapper::toDTO)
                 .toList();
         long totalCount = addressRepository.countWithFilter(filterField, filterValue);
         Integer totalPages = (int) Math.ceil((double) totalCount / size);
@@ -52,7 +48,7 @@ public class AddressService {
     public List<LocationDTO> getFreeLocations() {
         List<LocationDTO> freeLocations = new java.util.ArrayList<>(locationRepository.getFreeLocations()
                 .stream()
-                .map(locationMapper::toDTO)
+                .map(entityMapper::toDTO)
                 .toList());
 
         freeLocations.add(null);
@@ -72,7 +68,7 @@ public class AddressService {
 
         addressRepository.save(address);
 
-        return addressMapper.toDTO(address);
+        return entityMapper.toDTO(address);
     }
 
     @Transactional
@@ -96,7 +92,7 @@ public class AddressService {
             }
         }
 
-        return addressMapper.toDTO(address);
+        return entityMapper.toDTO(address);
     }
 
 

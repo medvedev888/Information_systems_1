@@ -10,9 +10,7 @@ import me.vladislav.information_systems_1.dto.PageResponse;
 import me.vladislav.information_systems_1.exception.AddressNotFoundException;
 import me.vladislav.information_systems_1.exception.CoordinatesNotFoundException;
 import me.vladislav.information_systems_1.exception.OrganizationNotFoundException;
-import me.vladislav.information_systems_1.mapper.AddressMapper;
-import me.vladislav.information_systems_1.mapper.CoordinatesMapper;
-import me.vladislav.information_systems_1.mapper.OrganizationMapper;
+import me.vladislav.information_systems_1.mapper.EntityMapper;
 import me.vladislav.information_systems_1.model.Address;
 import me.vladislav.information_systems_1.model.Coordinates;
 import me.vladislav.information_systems_1.model.Organization;
@@ -36,13 +34,7 @@ public class OrganizationService {
     private AddressRepository addressRepository;
 
     @Inject
-    private OrganizationMapper organizationMapper;
-
-    @Inject
-    private AddressMapper addressMapper;
-
-    @Inject
-    private CoordinatesMapper coordinatesMapper;
+    private EntityMapper entityMapper;
 
     @Transactional
     public PageResponse<OrganizationDTO> getPage(Integer page,
@@ -53,7 +45,7 @@ public class OrganizationService {
                                                  String sortOrder) {
         List<OrganizationDTO> organizations = organizationRepository.getPage(page, size, filterField, filterValue, sortField, sortOrder)
                 .stream()
-                .map(organizationMapper::toDTO)
+                .map(entityMapper::toDTO)
                 .toList();
         long totalCount = organizationRepository.countWithFilter(filterField, filterValue);
         Integer totalPages = (int) Math.ceil((double) totalCount / size);
@@ -65,7 +57,7 @@ public class OrganizationService {
     public List<AddressDTO> getFreeOfficialAddresses() {
         return addressRepository.getFreeAddresses()
                 .stream()
-                .map(addressMapper::toDTO)
+                .map(entityMapper::toDTO)
                 .toList();
     }
 
@@ -73,7 +65,7 @@ public class OrganizationService {
     public List<AddressDTO> getFreePostalAddresses() {
         List<AddressDTO> freePostalAddresses = new java.util.ArrayList<>(addressRepository.getFreeAddresses()
                 .stream()
-                .map(addressMapper::toDTO)
+                .map(entityMapper::toDTO)
                 .toList());
 
         freePostalAddresses.add(null);
@@ -84,7 +76,7 @@ public class OrganizationService {
     public List<CoordinatesDTO> getFreeCoordinates() {
         return coordinatesRepository.getFreeCoordinates()
                 .stream()
-                .map(coordinatesMapper::toDTO)
+                .map(entityMapper::toDTO)
                 .toList();
     }
 
@@ -116,7 +108,7 @@ public class OrganizationService {
 
         organizationRepository.save(organization);
 
-        return organizationMapper.toDTO(organization);
+        return entityMapper.toDTO(organization);
     }
 
 
@@ -179,7 +171,7 @@ public class OrganizationService {
             organization.setType(organizationDTO.getType());
         }
 
-        return organizationMapper.toDTO(organization);
+        return entityMapper.toDTO(organization);
     }
 
     @Transactional
@@ -203,7 +195,7 @@ public class OrganizationService {
     public List<OrganizationDTO> getByType(OrganizationType type) {
         return organizationRepository.findByType(type.name())
                 .stream()
-                .map(organizationMapper::toDTO)
+                .map(entityMapper::toDTO)
                 .toList();
     }
 
@@ -216,7 +208,7 @@ public class OrganizationService {
     @Transactional
     public OrganizationDTO mergeCreateNew(OrganizationDTO org1Dto, OrganizationDTO org2Dto, String name, AddressDTO officialAddress) {
         Integer organizationID = organizationRepository.mergeOrganizations(org1Dto.getId(), org2Dto.getId(), name, officialAddress.getId());
-        return organizationMapper
+        return entityMapper
                 .toDTO(organizationRepository.getById(organizationID)
                         .orElseThrow(() -> new OrganizationNotFoundException("Organization not found after merge, id=" + organizationID)));
     }
