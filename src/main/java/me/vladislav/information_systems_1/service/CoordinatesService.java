@@ -7,7 +7,7 @@ import me.vladislav.information_systems_1.dto.CoordinatesDTO;
 import me.vladislav.information_systems_1.dto.PageResponse;
 import me.vladislav.information_systems_1.exception.CoordinatesNotFoundException;
 import me.vladislav.information_systems_1.exception.RelatedEntityDeletionException;
-import me.vladislav.information_systems_1.mapper.CoordinatesMapper;
+import me.vladislav.information_systems_1.mapper.EntityMapper;
 import me.vladislav.information_systems_1.model.Coordinates;
 import me.vladislav.information_systems_1.repository.CoordinatesRepository;
 
@@ -19,12 +19,12 @@ public class CoordinatesService {
     private CoordinatesRepository coordinatesRepository;
 
     @Inject
-    private CoordinatesMapper coordinatesMapper;
+    private EntityMapper entityMapper;
 
     @Transactional
     public PageResponse<CoordinatesDTO> getPage(Integer page, Integer size) {
         List<CoordinatesDTO> coordinates = coordinatesRepository.getPage(page, size).stream()
-                .map(coordinatesMapper::toDTO)
+                .map(entityMapper::toDTO)
                 .toList();
         long totalCount = coordinatesRepository.count();
         Integer totalPages = (int) Math.ceil((double) totalCount / size);
@@ -40,7 +40,7 @@ public class CoordinatesService {
 
         coordinatesRepository.save(coordinates);
 
-        return coordinatesMapper.toDTO(coordinates);
+        return entityMapper.toDTO(coordinates);
     }
 
     @Transactional
@@ -55,7 +55,7 @@ public class CoordinatesService {
         if (coordinatesDTO.getY() != null) {
             coordinates.setY(coordinatesDTO.getY());
         }
-        return coordinatesMapper.toDTO(coordinates);
+        return entityMapper.toDTO(coordinates);
     }
 
     @Transactional

@@ -7,7 +7,7 @@ import me.vladislav.information_systems_1.dto.LocationDTO;
 import me.vladislav.information_systems_1.dto.PageResponse;
 import me.vladislav.information_systems_1.exception.LocationNotFoundException;
 import me.vladislav.information_systems_1.exception.RelatedEntityDeletionException;
-import me.vladislav.information_systems_1.mapper.LocationMapper;
+import me.vladislav.information_systems_1.mapper.EntityMapper;
 import me.vladislav.information_systems_1.model.Location;
 import me.vladislav.information_systems_1.repository.LocationRepository;
 
@@ -20,12 +20,12 @@ public class LocationService {
     private LocationRepository locationRepository;
 
     @Inject
-    private LocationMapper locationMapper;
+    private EntityMapper entityMapper;
 
     @Transactional
     public PageResponse<LocationDTO> getPage(Integer page, Integer size) {
         List<LocationDTO> locations = locationRepository.getPage(page, size).stream()
-                .map(locationMapper::toDTO)
+                .map(entityMapper::toDTO)
                 .toList();
         long totalCount = locationRepository.count();
         Integer totalPages = (int) Math.ceil((double) totalCount / size);
@@ -41,7 +41,7 @@ public class LocationService {
         location.setZ(locationDTO.getZ());
 
         locationRepository.save(location);
-        return locationMapper.toDTO(location);
+        return entityMapper.toDTO(location);
     }
 
     @Transactional
@@ -60,7 +60,7 @@ public class LocationService {
         if (locationDTO.getZ() != null) {
             location.setZ(locationDTO.getZ());
         }
-        return locationMapper.toDTO(location);
+        return entityMapper.toDTO(location);
     }
 
     @Transactional
