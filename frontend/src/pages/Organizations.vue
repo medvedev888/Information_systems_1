@@ -11,6 +11,7 @@ import EditIcon from '@/assets/editIcon.svg?component'
 import DeleteIcon from '@/assets/deleteIcon.svg?component'
 import DetailsPopup from "@/components/details-popup.vue";
 import FormCreate from "@/components/forms/form-create.vue";
+import FormImport from "@/components/forms/form-import.vue";
 import Input from "@/components/input.vue";
 import Select from "@/components/select.vue";
 import FormUpdate from "@/components/forms/form-update.vue";
@@ -24,6 +25,7 @@ const rows = reactive([]);
 const popup = reactive({visible: false, data: null, x: 0, y: 0});
 const showCreate = ref(false)
 const showUpdate = ref(false)
+const showImport = ref(false)
 const form = ref({
   name: '',
   coordinates: null,
@@ -39,6 +41,7 @@ const organizationTypes = ['COMMERCIAL', 'GOVERNMENT', 'TRUST'];
 const freeCoordinates = ref([]);
 const freeOfficialAddresses = ref([]);
 const freePostalAddresses = ref([]);
+const importFile = ref(null)
 
 const columns = [
   {key: "id", label: "ID"},
@@ -127,6 +130,17 @@ async function updateRow(row) {
   }
 }
 
+async function importRows() {
+  try {
+    console.log("Файл получен:", importFile.value.name);
+
+    // await axios.post('/organizations/import', importFile);
+    showImport.value = false;
+  } catch (err) {
+    showErrorFromResponse(err, errorModal, fieldLabels);
+  }
+}
+
 async function deleteRow(row) {
   try {
     await axios.delete(`/organizations/${row.id}`);
@@ -181,6 +195,10 @@ function resetForm() {
     fullName: '',
     type: null
   }
+}
+
+function openImportModal() {
+  showImport.value = true;
 }
 
 // ----------------- Fetch -----------------
@@ -312,7 +330,11 @@ watch([filterField, filterValue], () => {
           <Input v-model="filterValue" placeholder="Search string"></Input>
           <Button label="Confirm" @click="fetchOrganizations"></Button>
         </div>
-        <Button label="Create" type="button" @click="openCreateModal"/>
+
+        <div class="add-buttons-container">
+          <Button label="Create" type="button" @click="openCreateModal"/>
+          <Button label="Import" type="button" @click="openImportModal"/>
+        </div>
       </div>
       <Table :columns="columns"
              :rows="rows"
@@ -366,7 +388,7 @@ watch([filterField, filterValue], () => {
 
   <!--  Overlay  -->
   <div
-    v-if="popup.visible || showCreate || showUpdate"
+    v-if="popup.visible || showCreate || showUpdate || showImport"
     class="overlay"
     @mouseover="hideDetails"
   ></div>
@@ -427,6 +449,15 @@ watch([filterField, filterValue], () => {
       <Input v-model.number="form.rating" type="number" placeholder="Rating"/>
     </div>
   </FormCreate>
+
+  <!--  Import Modal  -->
+  <FormImport
+    v-if="showImport"
+    title="Import Organizations"
+    v-model:file="importFile"
+    @submit="importRows"
+    @cancel="showImport = false"
+  />
 
 
   <!--  Update Modal  -->
@@ -546,6 +577,12 @@ h2, p {
 
 .filter-container {
   display: flex;
+  gap: 1rem;
+}
+
+.add-buttons-container {
+  display: flex;
+  flex-direction: row;
   gap: 1rem;
 }
 
