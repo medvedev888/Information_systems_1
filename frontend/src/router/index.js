@@ -6,6 +6,7 @@ import SpecialOperations from '../pages/SpecialOperations.vue'
 import Addresses from "@/pages/Addresses.vue";
 import Locations from "@/pages/Locations.vue";
 import Coordinates from "@/pages/Coordinates.vue";
+import ImportHistory from "@/pages/ImportHistory.vue";
 
 const routes = [
   { path: "/registration", name: "Registration", component: Registration },
@@ -17,7 +18,8 @@ const routes = [
   { path: "/addresses", name: "Addresses", component: Addresses, meta: { requiresAuth: true } },
   { path: "/coordinates", name: "Coordinates", component: Coordinates, meta: { requiresAuth: true } },
 
-  { path: "/operations", name: "SpecialOperations", component: SpecialOperations, meta: { requiresAuth: true } }
+  { path: "/operations", name: "SpecialOperations", component: SpecialOperations, meta: { requiresAuth: true } },
+  { path: "/import-history", name: "ImportHistory", component: ImportHistory, meta: { requiresAuth: true } }
 ];
 
 
