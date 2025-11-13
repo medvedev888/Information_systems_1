@@ -24,7 +24,7 @@ function isActive(href) {
 <template>
   <header class="app-header">
     <div class="left header-block">
-      <div class="group">P3206</div>
+      <div class="group">P3306</div>
       <div class="name">
         <p>Medvedev Vladislav</p>
         <p>Aleksandrovich</p>
@@ -39,6 +39,7 @@ function isActive(href) {
           {label: 'Locations', href: '/locations'},
           {label: 'Coordinates', href: '/coordinates'},
           {label: 'Operations', href: '/operations'},
+          {label: 'History', href: '/import-history'},
         ]"
         :key="item.href"
         :label="item.label"
@@ -69,7 +70,7 @@ function isActive(href) {
 }
 
 .left, .center, .right {
-  padding: 0 2rem;
+  padding: 0 1rem;
   height: 5.25rem;
 }
 
