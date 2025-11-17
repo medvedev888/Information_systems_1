@@ -13,6 +13,7 @@ import me.vladislav.information_systems_1.dto.AuthRequest;
 import me.vladislav.information_systems_1.dto.AuthResponse;
 import me.vladislav.information_systems_1.dto.UserDTO;
 import me.vladislav.information_systems_1.exception.InvalidCredentialsException;
+import me.vladislav.information_systems_1.model.Role;
 import me.vladislav.information_systems_1.service.UserService;
 import me.vladislav.information_systems_1.utils.JwtUtil;
 
@@ -30,11 +31,12 @@ public class AuthController {
         UserDTO userDTO = new UserDTO();
         userDTO.setLogin(request.getLogin());
         userDTO.setPassword(request.getPassword());
+        userDTO.setRole(Role.USER);
 
         UserDTO savedUserDTO = userService.registerNewUserAccount(userDTO);
 
-        String token = JwtUtil.generateToken(savedUserDTO.getLogin());
-        AuthResponse response = new AuthResponse(token, new UserDTO(savedUserDTO.getId(), savedUserDTO.getLogin(), savedUserDTO.getPassword()));
+        String token = JwtUtil.generateToken(savedUserDTO.getLogin(), savedUserDTO.getRole().name());
+        AuthResponse response = new AuthResponse(token, new UserDTO(savedUserDTO.getId(), savedUserDTO.getLogin(), savedUserDTO.getPassword(), savedUserDTO.getRole()));
         return Response.status(Response.Status.CREATED)
                 .header("Authorization", "Bearer " + token)
                 .entity(response)
@@ -50,8 +52,8 @@ public class AuthController {
             throw new InvalidCredentialsException("Invalid login or password");
         }
 
-        String token = JwtUtil.generateToken(userDTO.getLogin());
-        AuthResponse response = new AuthResponse(token, new UserDTO(userDTO.getId(), userDTO.getLogin(), null));
+        String token = JwtUtil.generateToken(userDTO.getLogin(), userDTO.getRole().name());
+        AuthResponse response = new AuthResponse(token, new UserDTO(userDTO.getId(), userDTO.getLogin(), null, userDTO.getRole()));
         return Response.ok()
                 .header("Authorization", "Bearer " + token)
                 .entity(response)

@@ -1,5 +1,6 @@
 package me.vladislav.information_systems_1.filter;
 
+import io.jsonwebtoken.Claims;
 import jakarta.annotation.Priority;
 import jakarta.ws.rs.Priorities;
 import jakarta.ws.rs.container.ContainerRequestContext;
@@ -8,14 +9,13 @@ import jakarta.ws.rs.core.SecurityContext;
 import jakarta.ws.rs.ext.Provider;
 import me.vladislav.information_systems_1.utils.JwtUtil;
 
-import java.io.IOException;
 import java.security.Principal;
 
 @Provider
 @Priority(Priorities.AUTHENTICATION)
 public class JwtAuthFilter implements ContainerRequestFilter {
     @Override
-    public void filter(ContainerRequestContext requestContext) throws IOException {
+    public void filter(ContainerRequestContext requestContext) {
         String path = requestContext.getUriInfo().getPath();
         if (path.startsWith("/auth") || path.startsWith("/events")) {
             return;
@@ -32,9 +32,13 @@ public class JwtAuthFilter implements ContainerRequestFilter {
         }
 
         String token = authHeader.substring("Bearer ".length());
+        Claims claims;
         String login;
+        String role;
         try {
-            login = JwtUtil.validateToken(token).getSubject();
+            claims = JwtUtil.validateToken(token);
+            login = claims.getSubject();
+            role = claims.get("role", String.class);
         } catch (Exception e) {
             requestContext.abortWith(
                     jakarta.ws.rs.core.Response.status(jakarta.ws.rs.core.Response.Status.UNAUTHORIZED)
@@ -52,9 +56,8 @@ public class JwtAuthFilter implements ContainerRequestFilter {
             }
 
             @Override
-            public boolean isUserInRole(String role) {
-                // Можно подключить проверку ролей
-                return true;
+            public boolean isUserInRole(String r) {
+                return role != null && role.equalsIgnoreCase(r);
             }
 
             @Override
