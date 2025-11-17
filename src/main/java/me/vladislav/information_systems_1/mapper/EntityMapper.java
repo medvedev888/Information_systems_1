@@ -1,14 +1,9 @@
 package me.vladislav.information_systems_1.mapper;
 
-import me.vladislav.information_systems_1.dto.AddressDTO;
-import me.vladislav.information_systems_1.dto.CoordinatesDTO;
-import me.vladislav.information_systems_1.dto.LocationDTO;
-import me.vladislav.information_systems_1.dto.OrganizationDTO;
-import me.vladislav.information_systems_1.model.Address;
-import me.vladislav.information_systems_1.model.Coordinates;
-import me.vladislav.information_systems_1.model.Location;
-import me.vladislav.information_systems_1.model.Organization;
+import me.vladislav.information_systems_1.dto.*;
+import me.vladislav.information_systems_1.model.*;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "cdi")
 public interface EntityMapper {
@@ -24,5 +19,9 @@ public interface EntityMapper {
 
     OrganizationDTO toDTO(Organization organization);
     Organization toEntity(OrganizationDTO dto);
+
+    @Mapping(target = "login", source = "user.login")
+    ImportHistoryDTO toDTO(ImportHistory importHistory);
+    ImportHistory toEntity(ImportHistoryDTO dto);
 }
 
