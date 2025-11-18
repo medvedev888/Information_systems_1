@@ -22,6 +22,4 @@ public interface EntityMapper {
 
     @Mapping(target = "login", source = "user.login")
     ImportHistoryDTO toDTO(ImportHistory importHistory);
-    ImportHistory toEntity(ImportHistoryDTO dto);
 }
-

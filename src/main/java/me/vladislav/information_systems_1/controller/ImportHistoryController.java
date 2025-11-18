@@ -18,7 +18,6 @@ import me.vladislav.information_systems_1.service.ImportHistoryService;
 @ApplicationScoped
 public class ImportHistoryController {
 
-
     @Context
     private SecurityContext securityContext;
 

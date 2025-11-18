@@ -4,6 +4,8 @@ package me.vladislav.information_systems_1.repository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import me.vladislav.information_systems_1.model.Address;
+import me.vladislav.information_systems_1.model.Coordinates;
 import me.vladislav.information_systems_1.model.Organization;
 
 import java.util.List;
@@ -22,9 +24,11 @@ public class OrganizationRepository {
             "type", "type"
     );
 
+
     public Optional<Organization> getById(Integer id) {
         return Optional.ofNullable(entityManager.find(Organization.class, id));
     }
+
 
     public List<Organization> getPage(int page, int size,
                                       String filterField, String filterValue,
@@ -59,6 +63,7 @@ public class OrganizationRepository {
                 .getResultList();
     }
 
+
     public long countWithFilter(String filterField, String filterValue) {
         StringBuilder jpql = new StringBuilder("SELECT COUNT(o) FROM Organization o");
         boolean hasFilter = filterField != null && ALLOWED_FIELDS.containsKey(filterField)
@@ -78,13 +83,34 @@ public class OrganizationRepository {
         return query.getSingleResult();
     }
 
+
     public void save(Organization organization) {
         entityManager.persist(organization);
     }
 
+
     public void delete(Organization organization) {
         entityManager.remove(organization);
     }
+
+
+    public boolean existsByCoordinates(Coordinates coordinates) {
+        String jpql = "SELECT COUNT(o) FROM Organization o WHERE o.coordinates = :coordinates";
+        Long count = entityManager.createQuery(jpql, Long.class)
+                .setParameter("coordinates", coordinates)
+                .getSingleResult();
+        return count > 0;
+    }
+
+
+    public boolean existsByAddress(Address address) {
+        String jpql = "SELECT COUNT(o) FROM Organization o WHERE o.officialAddress = :address";
+        Long count = entityManager.createQuery(jpql, Long.class)
+                .setParameter("address", address)
+                .getSingleResult();
+        return count > 0;
+    }
+
 
     // 1) Количество организаций с rating < заданного
     public long countByRatingLessThan(Double rating) {

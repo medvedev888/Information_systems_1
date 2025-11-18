@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import me.vladislav.information_systems_1.model.ImportHistory;
+import me.vladislav.information_systems_1.model.Organization;
 
 import java.util.List;
 import java.util.Map;
@@ -89,6 +90,10 @@ public class ImportHistoryRepository {
         }
 
         return query.getSingleResult();
+    }
+
+    public void save(ImportHistory importHistory) {
+        entityManager.persist(importHistory);
     }
 
 }

@@ -14,7 +14,10 @@ public class GlobalExceptionHandler implements ExceptionMapper<RuntimeException>
     public Response toResponse(RuntimeException exception) {
 
         if (exception instanceof RelatedEntityDeletionException
-                || exception instanceof IllegalArgumentException) {
+                || exception instanceof IllegalArgumentException
+                || exception instanceof ImportParseException
+                || exception instanceof CoordinatesAlreadyUsedException
+                || exception instanceof AddressAlreadyUsedException) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(Map.of("success", false, "message", exception.getMessage()))
                     .build();
