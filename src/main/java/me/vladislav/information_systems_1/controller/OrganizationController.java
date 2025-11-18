@@ -1,11 +1,14 @@
 package me.vladislav.information_systems_1.controller;
 
+import com.sun.jersey.multipart.FormDataParam;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.SecurityContext;
 import me.vladislav.information_systems_1.dto.AddressDTO;
 import me.vladislav.information_systems_1.dto.CoordinatesDTO;
 import me.vladislav.information_systems_1.dto.OrganizationDTO;
@@ -13,6 +16,7 @@ import me.vladislav.information_systems_1.dto.PageResponse;
 import me.vladislav.information_systems_1.service.EventService;
 import me.vladislav.information_systems_1.service.OrganizationService;
 
+import java.io.InputStream;
 import java.util.List;
 
 @Path("/organizations")
@@ -25,6 +29,9 @@ public class OrganizationController {
 
     @Inject
     private EventService eventService;
+
+    @Context
+    private SecurityContext securityContext;
 
     @GET
     public Response getPage(@QueryParam("page") Integer pageParam,
@@ -42,6 +49,15 @@ public class OrganizationController {
 
         PageResponse<OrganizationDTO> response = organizationService.getPage(page, size, filterField, filterValue, sortField, sortOrder);
         return Response.ok(response).build();
+    }
+
+    @POST
+    @Path("/import")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    public Response importFromJson(@FormDataParam("file") InputStream file) {
+        List<OrganizationDTO> organizations = organizationService.importFromJson(file,  securityContext.getUserPrincipal().getName());
+        eventService.sendEvent("ORGANIZATIONS", "IMPORTED", organizations);
+        return Response.status(Response.Status.CREATED).build();
     }
 
     @GET

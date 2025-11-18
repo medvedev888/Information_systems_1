@@ -3,14 +3,14 @@ package me.vladislav.information_systems_1.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import me.vladislav.information_systems_1.model.Role;
+import me.vladislav.information_systems_1.model.Status;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserDTO {
+public class ImportHistoryDTO {
     private Long id;
     private String login;
-    private String password;
-    private Role role;
+    private Status status;
+    private Integer importedCount;
 }

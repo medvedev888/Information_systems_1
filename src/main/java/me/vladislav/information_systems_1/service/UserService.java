@@ -24,15 +24,16 @@ public class UserService {
         User user = new User();
         user.setLogin(dto.getLogin());
         user.setPassword(PasswordUtil.hashPassword(dto.getPassword()));
+        user.setRole(dto.getRole());
 
         userRepository.save(user);
-        return new UserDTO(user.getId(), user.getLogin(), null);
+        return new UserDTO(user.getId(), user.getLogin(), null, user.getRole());
     }
 
     public UserDTO getUserByLogin(String login) {
         User user = userRepository.getByLogin(login)
                 .orElseThrow(() -> new UserNotFoundException("Пользователь с логином \"" + login + "\" не найден"));
-        return new UserDTO(user.getId(), user.getLogin(), user.getPassword());
+        return new UserDTO(user.getId(), user.getLogin(), user.getPassword(), user.getRole());
     }
 
     public boolean confirmUserPassword(String password, String hashedPassword) {

@@ -1,27 +1,28 @@
 package me.vladislav.information_systems_1.model;
 
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "users")
+@Table(name = "import_history")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class User {
+public class ImportHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
-    private String login;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Column(nullable = false)
-    private String password;
-
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Role role;
+    private Status status;
+
+    private Integer importedCount;
 }
