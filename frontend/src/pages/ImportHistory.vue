@@ -8,6 +8,7 @@ import {showErrorFromResponse} from "@/utils/error.js";
 import Input from "@/components/input.vue";
 import Button from "@/components/button.vue";
 import Select from "@/components/select.vue";
+import axios from "@/axios.js";
 
 const page = ref(1);
 const totalPages = ref(1);
@@ -15,8 +16,8 @@ const rows = reactive([]);
 const columns = [
   {key: "id", label: "ID"},
   {key: "status", label: "Status"},
-  {key: "user", label: "User"},
-  {key: "count", label: "Count"}
+  {key: "login", label: "User"},
+  {key: "importedCount", label: "Count"}
 ];
 let eventSource = null; // для SSE
 const filterField = ref(null);
@@ -25,14 +26,14 @@ const sortField = ref(null);
 const sortOrder = ref(null);
 const str_columns = [
   {key: "status", label: "Status"},
-  {key: "user", label: "User"}
+  {key: "login", label: "User"}
 ];
 const errorModal = ref(null);
 const fieldLabels = {
   id: "ID",
   status: "Status",
-  user: "User",
-  count: "Count"
+  login: "User",
+  importedCount: "Count"
 };
 
 // ----------------- Fetch -----------------
@@ -40,7 +41,7 @@ async function fetchImportHistory() {
   try {
     const params = new URLSearchParams({
       page: page.value,
-      size: 8
+      size: 10
     });
 
     if (filterField.value && filterValue.value) {
@@ -52,6 +53,11 @@ async function fetchImportHistory() {
       params.append('sortField', sortField.value);
       params.append('sortOrder', sortOrder.value);
     }
+    const res = await axios.get(`/imports?${params.toString()}`);
+    const imports = res.data.data || [];
+
+    rows.splice(0, rows.length, ...imports);
+    totalPages.value = res.data.totalPages ?? 1;
   } catch (err) {
     showErrorFromResponse(err, errorModal, fieldLabels);
   }
@@ -63,7 +69,7 @@ onMounted(() => {
   // подписка на SSE
   const eventSource = new EventSource("http://localhost:8080/Lab_1-1.0-SNAPSHOT/api/events");
 
-  eventSource.addEventListener("ORGANIZATION_IMPORTED", () => {
+  eventSource.addEventListener("ORGANIZATIONS_IMPORTED", () => {
     fetchImportHistory();
   });
 });
@@ -96,13 +102,14 @@ watch(page, fetchImportHistory);
         <h2>Import history</h2>
         <div class="filter-container">
           <Select
+            :action="console.log()"
             v-model="filterField"
             :options="str_columns"
             valueKey="key"
             labelKey="label"
           />
           <Input v-model="filterValue" placeholder="Search string"></Input>
-          <Button label="Confirm" @click="fetchAddresses"></Button>
+          <Button label="Confirm" @click="fetchImportHistory"></Button>
         </div>
       </div>
       <Table :columns="columns"
@@ -110,7 +117,7 @@ watch(page, fetchImportHistory);
              :sort-field="sortField"
              :sort-order="sortOrder"
              @sortChanged="handleSortChanged"
-             :sortable-columns="['status', 'user']"
+             :sortable-columns="['status', 'login']"
       >
       </Table>
     </div>

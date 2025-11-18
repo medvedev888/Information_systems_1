@@ -132,14 +132,23 @@ async function updateRow(row) {
 
 async function importRows() {
   try {
-    console.log("Файл получен:", importFile.value.name);
 
-    // await axios.post('/organizations/import', importFile);
+    const formData = new FormData();
+    formData.append('file', importFile.value);
+
+    await axios.post('/organizations/import', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+
     showImport.value = false;
   } catch (err) {
-    showErrorFromResponse(err, errorModal, fieldLabels);
+    const msg = err.response?.data?.message || err;
+    showErrorFromResponse(msg, errorModal, fieldLabels);
   }
 }
+
 
 async function deleteRow(row) {
   try {
@@ -285,6 +294,9 @@ onMounted(() => {
     fetchOrganizations();
   });
   eventSource.addEventListener("ORGANIZATION_ABSORBED", () => {
+    fetchOrganizations();
+  });
+  eventSource.addEventListener("ORGANIZATIONS_IMPORTED", () => {
     fetchOrganizations();
   });
 });
