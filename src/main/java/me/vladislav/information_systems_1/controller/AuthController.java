@@ -75,8 +75,9 @@ public class AuthController {
             throw new UserForbiddenException("You do not have permission to perform this action.");
         }
 
-        userService.updateRole(dto);
-        return Response.ok().build();
+        UserDTO userDTO = userService.updateRole(dto);
+        eventService.sendEvent("USER", "UPDATED", userDTO);
+        return Response.ok(userDTO).build();
     }
 
 

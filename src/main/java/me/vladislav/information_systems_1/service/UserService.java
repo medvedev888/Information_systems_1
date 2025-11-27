@@ -41,7 +41,7 @@ public class UserService {
     }
 
     @Transactional
-    public void updateRole(RoleUpdateDTO roleUpdateDTO) {
+    public UserDTO updateRole(RoleUpdateDTO roleUpdateDTO) {
         User target;
         target = userRepository.getByLogin(roleUpdateDTO.getLogin())
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
@@ -52,11 +52,12 @@ public class UserService {
             if (!newRole.equals("ADMIN")) {
                 throw new WebApplicationException("Admins cannot downgrade other admins", 403);
             }
-            return;
+            return new UserDTO(target.getId(), target.getLogin(), null, target.getRole());
         }
 
         target.setRole(Role.valueOf(newRole));
         userRepository.save(target);
+        return new UserDTO(target.getId(), target.getLogin(), null, target.getRole());
     }
 
     public UserDTO getUserByLogin(String login, boolean includePassword) {
