@@ -105,4 +105,12 @@ public class AuthController {
         return Response.ok(response).build();
     }
 
+    @GET
+    @Path("/me")
+    public Response getCurrentUser() {
+        String login = securityContext.getUserPrincipal().getName();
+        UserDTO userDTO = userService.getUserByLogin(login);
+        return Response.ok(userDTO).build();
+    }
+
 }

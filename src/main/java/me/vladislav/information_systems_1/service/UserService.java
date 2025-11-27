@@ -62,6 +62,7 @@ public class UserService {
     public UserDTO getUserByLogin(String login) {
         User user = userRepository.getByLogin(login)
                 .orElseThrow(() -> new UserNotFoundException("Пользователь с логином \"" + login + "\" не найден"));
+        user.setPassword(null);
         return new UserDTO(user.getId(), user.getLogin(), user.getPassword(), user.getRole());
     }
 
