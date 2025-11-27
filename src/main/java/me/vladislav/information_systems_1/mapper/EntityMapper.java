@@ -8,6 +8,10 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "cdi")
 public interface EntityMapper {
 
+    @Mapping(target = "password", ignore = true)
+    UserDTO toDTO(User user);
+    User toEntity(UserDTO dto);
+
     AddressDTO toDTO(Address address);
     Address toEntity(AddressDTO dto);
 

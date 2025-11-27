@@ -36,6 +36,12 @@ public class GlobalExceptionHandler implements ExceptionMapper<RuntimeException>
                     .build();
         }
 
+        if (exception instanceof UserForbiddenException) {
+            return Response.status(Response.Status.FORBIDDEN)
+                    .entity(Map.of("success", false, "message", exception.getMessage()))
+                    .build();
+        }
+
         if (exception instanceof AddressNotFoundException
                 || exception instanceof LocationNotFoundException
                 || exception instanceof CoordinatesNotFoundException
