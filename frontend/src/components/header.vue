@@ -1,16 +1,19 @@
 <script setup>
-import {ref} from "vue";
+import {ref, watch} from "vue";
 import {useRoute, useRouter} from "vue-router";
 import Button from "@/components/button.vue";
 import Link from "@/components/link.vue";
+import {useAuthStore} from "@/stores/authStore.js";
+import { computed } from 'vue';
+
 
 const router = useRouter();
 const route = useRoute();
-const userLogin = ref(localStorage.getItem("userLogin") || "Guest");
+const userLogin = ref("Guest");
+const auth = useAuthStore();
 
 function logout() {
   localStorage.removeItem("jwt");
-  localStorage.removeItem("userLogin");
   router.push("/login");
 }
 
@@ -18,6 +21,23 @@ function isActive(href) {
   return route.path === href;
 }
 
+const menuItems = [
+  {label: 'Organizations', href: '/', adminOnly: false},
+  {label: 'Addresses', href: '/addresses', adminOnly: false},
+  {label: 'Locations', href: '/locations', adminOnly: false},
+  {label: 'Coordinates', href: '/coordinates', adminOnly: false},
+  {label: 'Operations', href: '/operations', adminOnly: false},
+  {label: 'History', href: '/import-history', adminOnly: false},
+  {label: 'Admin Panel', href: '/admin-panel', adminOnly: true}
+];
+
+const visibleMenuItems = computed(() =>
+  menuItems.filter(item => !item.adminOnly || auth.user?.role === 'ADMIN')
+)
+
+watch(() => auth.user, (newUser) => {
+  userLogin.value = newUser?.login || 'Guest'
+})
 </script>
 
 
@@ -33,23 +53,18 @@ function isActive(href) {
 
     <div class="center">
       <Link
-        v-for="item in [
-          {label: 'Organizations', href: '/'},
-          {label: 'Addresses', href: '/addresses'},
-          {label: 'Locations', href: '/locations'},
-          {label: 'Coordinates', href: '/coordinates'},
-          {label: 'Operations', href: '/operations'},
-          {label: 'History', href: '/import-history'},
-        ]"
+        v-for="item in visibleMenuItems"
         :key="item.href"
+        v-if="!item?.adminOnly || auth.user?.role === 'ADMIN'"
         :label="item.label"
         :href="item.href"
         :class="{ active: isActive(item.href) }"
       />
     </div>
 
+
     <div class="right">
-      <span class="login">{{ userLogin }}</span>
+      <span class="login">{{ auth.user?.login }}</span>
       <Button
         class="logout-button"
         @click="logout"
@@ -65,7 +80,7 @@ function isActive(href) {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.5rem 4rem;
+  padding: 0.5rem 2rem;
   border-bottom: 1px solid black;
 }
 

@@ -4,15 +4,16 @@ import {reactive} from "vue";
 import router from "@/router/index.js";
 import Link from "@/components/link.vue";
 import axios from "@/axios.js";
+import {useAuthStore} from "@/stores/authStore.js";
 
 
+const auth = useAuthStore();
 const formData = reactive({login: "", password: ""});
 
 async function authRequest(endpoint, login, password) {
   try {
     const res = await axios.post(`/auth/${endpoint}`, { login, password });
     localStorage.setItem("jwt", res.data.token);
-    localStorage.setItem("userLogin", res.data.userDTO.login);
     return { success: true };
   } catch (err) {
     if (err.response) {
@@ -32,6 +33,7 @@ async function handleLogin(data) {
   const result = await authRequest("login", formData.login, formData.password);
 
   if (result.success) {
+    await auth.fetchMe();
     await router.push("/");
   } else {
     alert(Object.values(result.errors).join("\n"));
