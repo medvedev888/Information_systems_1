@@ -74,9 +74,11 @@ async function fetchUsers() {
     const users = res.data.data || [];
 
     users.forEach(row => {
-      row.operations = [
-        {type: "Edit", icon: markRaw(AddAdminIcon), onClick: () => promoteToAdmin(row)},
-      ];
+      if(row.role!=="ADMIN") {
+        row.operations = [
+          {type: "Edit", icon: markRaw(AddAdminIcon), onClick: () => promoteToAdmin(row)},
+        ];
+      }
     });
 
     rows.splice(0, rows.length, ...users);
