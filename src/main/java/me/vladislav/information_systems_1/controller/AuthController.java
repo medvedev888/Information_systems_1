@@ -53,7 +53,7 @@ public class AuthController {
     @POST
     @Path("/login")
     public Response login(@Valid AuthRequest request) {
-        UserDTO userDTO = userService.getUserByLogin(request.getLogin());
+        UserDTO userDTO = userService.getUserByLogin(request.getLogin(), true);
 
         if (!userService.confirmUserPassword(request.getPassword(), userDTO.getPassword())) {
             throw new InvalidCredentialsException("Invalid login or password");
@@ -109,7 +109,7 @@ public class AuthController {
     @Path("/me")
     public Response getCurrentUser() {
         String login = securityContext.getUserPrincipal().getName();
-        UserDTO userDTO = userService.getUserByLogin(login);
+        UserDTO userDTO = userService.getUserByLogin(login, false);
         return Response.ok(userDTO).build();
     }
 

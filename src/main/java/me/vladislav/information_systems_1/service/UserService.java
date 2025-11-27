@@ -59,11 +59,13 @@ public class UserService {
         userRepository.save(target);
     }
 
-    public UserDTO getUserByLogin(String login) {
+    public UserDTO getUserByLogin(String login, boolean includePassword) {
         User user = userRepository.getByLogin(login)
                 .orElseThrow(() -> new UserNotFoundException("Пользователь с логином \"" + login + "\" не найден"));
-        user.setPassword(null);
-        return new UserDTO(user.getId(), user.getLogin(), user.getPassword(), user.getRole());
+
+        String password = includePassword ? user.getPassword() : null;
+
+        return new UserDTO(user.getId(), user.getLogin(), password, user.getRole());
     }
 
     public boolean confirmUserPassword(String password, String hashedPassword) {
