@@ -102,7 +102,6 @@ watch(page, fetchImportHistory);
         <h2>Import history</h2>
         <div class="filter-container">
           <Select
-            :action="console.log()"
             v-model="filterField"
             :options="str_columns"
             valueKey="key"
