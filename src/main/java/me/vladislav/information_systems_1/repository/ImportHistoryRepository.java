@@ -15,7 +15,7 @@ public class ImportHistoryRepository {
     private EntityManager entityManager;
 
     private static final Map<String, String> ALLOWED_FIELDS = Map.of(
-            "user", "user.login",
+            "login", "user.login",
             "status", "status"
     );
 
