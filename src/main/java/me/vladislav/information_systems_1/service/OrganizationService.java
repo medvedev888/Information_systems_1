@@ -7,6 +7,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
+import me.vladislav.information_systems_1.cache.LogCacheStats;
 import me.vladislav.information_systems_1.dto.*;
 import me.vladislav.information_systems_1.exception.*;
 import me.vladislav.information_systems_1.mapper.EntityMapper;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.Set;
 
 @ApplicationScoped
+@LogCacheStats
 public class OrganizationService {
 
     @Inject

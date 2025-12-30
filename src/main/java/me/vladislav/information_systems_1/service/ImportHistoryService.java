@@ -3,6 +3,7 @@ package me.vladislav.information_systems_1.service;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import me.vladislav.information_systems_1.cache.LogCacheStats;
 import me.vladislav.information_systems_1.dto.ImportHistoryDTO;
 import me.vladislav.information_systems_1.dto.PageResponse;
 import me.vladislav.information_systems_1.mapper.EntityMapper;
@@ -16,6 +17,7 @@ import java.util.List;
 import static jakarta.transaction.Transactional.TxType.REQUIRES_NEW;
 
 @ApplicationScoped
+@LogCacheStats
 public class ImportHistoryService {
 
     @Inject

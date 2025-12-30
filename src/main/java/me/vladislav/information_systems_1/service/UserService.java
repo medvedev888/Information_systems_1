@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.WebApplicationException;
+import me.vladislav.information_systems_1.cache.LogCacheStats;
 import me.vladislav.information_systems_1.dto.PageResponse;
 import me.vladislav.information_systems_1.dto.RoleUpdateDTO;
 import me.vladislav.information_systems_1.dto.UserDTO;
@@ -18,6 +19,7 @@ import me.vladislav.information_systems_1.utils.PasswordUtil;
 import java.util.List;
 
 @ApplicationScoped
+@LogCacheStats
 public class UserService {
 
     @Inject
