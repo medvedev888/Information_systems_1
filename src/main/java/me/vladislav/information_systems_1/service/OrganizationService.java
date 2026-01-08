@@ -16,6 +16,7 @@ import me.vladislav.information_systems_1.repository.AddressRepository;
 import me.vladislav.information_systems_1.repository.CoordinatesRepository;
 import me.vladislav.information_systems_1.repository.OrganizationRepository;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
@@ -40,6 +41,9 @@ public class OrganizationService {
 
     @Inject
     private EntityMapper entityMapper;
+
+    @Inject
+    private MinioService minioService;
 
     @PersistenceContext(unitName = "Lab1PU")
     private EntityManager entityManager;
@@ -67,19 +71,29 @@ public class OrganizationService {
         ImportHistoryDTO historyDTO = new ImportHistoryDTO();
         historyDTO.setLogin(login);
         int importedCount = 0;
-
         List<OrganizationDTO> dtos;
+        List<Organization> entities;
+        String cleanJson;
+
         try {
-            String text = new String(file.readAllBytes(), StandardCharsets.UTF_8).replace("\uFEFF", "");
+            byte[] rawBytes = file.readAllBytes();
+
+            String text = new String(rawBytes, StandardCharsets.UTF_8)
+                    .replace("\uFEFF", "");
+
             int startIdx = Math.min(
                     text.indexOf('[') != -1 ? text.indexOf('[') : text.indexOf('{'),
                     text.indexOf('{') != -1 ? text.indexOf('{') : text.indexOf('[')
             );
             int endIdx = Math.max(text.lastIndexOf(']'), text.lastIndexOf('}'));
-            text = text.substring(startIdx, endIdx + 1).trim();
+
+            cleanJson = text.substring(startIdx, endIdx + 1).trim();
 
             ObjectMapper mapper = new ObjectMapper();
-            dtos = mapper.readValue(text, mapper.getTypeFactory().constructCollectionType(List.class, OrganizationDTO.class));
+            dtos = mapper.readValue(
+                    cleanJson,
+                    mapper.getTypeFactory().constructCollectionType(List.class, OrganizationDTO.class)
+            );
         } catch (Exception e) {
             historyDTO.setStatus(Status.FAILED);
             historyDTO.setImportedCount(0);
@@ -92,22 +106,26 @@ public class OrganizationService {
             Set<Long> usedOfficialAddressIds = new HashSet<>();
             Set<Long> usedPostalAddressIds = new HashSet<>();
 
-            List<Organization> entities = dtos.stream()
+            entities = dtos.stream()
                     .map(dto -> {
-                        // Блокируем координаты и адрес для записи
                         Coordinates coord = entityManager.find(
-                                Coordinates.class, dto.getCoordinates().getId(), LockModeType.PESSIMISTIC_WRITE);
+                                Coordinates.class,
+                                dto.getCoordinates().getId(),
+                                LockModeType.PESSIMISTIC_WRITE
+                        );
                         Address official = entityManager.find(
-                                Address.class, dto.getOfficialAddress().getId(), LockModeType.PESSIMISTIC_WRITE);
+                                Address.class,
+                                dto.getOfficialAddress().getId(),
+                                LockModeType.PESSIMISTIC_WRITE
+                        );
 
                         if (organizationRepository.existsByCoordinates(coord)) {
-                            throw new CoordinatesAlreadyUsedException("Coordinates заняты");
+                            throw new CoordinatesAlreadyUsedException("Coordinates already used");
                         }
                         if (organizationRepository.existsByAddress(official)) {
-                            throw new AddressAlreadyUsedException("Official address занят");
+                            throw new AddressAlreadyUsedException("Official address already used");
                         }
 
-                        // Проверка на дубли внутри файла
                         if (!usedCoordinatesIds.add(coord.getId())) {
                             throw new CoordinatesAlreadyUsedException("Coordinates duplicated in import");
                         }
@@ -115,8 +133,7 @@ public class OrganizationService {
                             throw new AddressAlreadyUsedException("Official address duplicated in import");
                         }
                         if (dto.getPostalAddress() != null && dto.getPostalAddress().getId() != null) {
-                            Long postalId = dto.getPostalAddress().getId();
-                            if (!usedPostalAddressIds.add(postalId)) {
+                            if (!usedPostalAddressIds.add(dto.getPostalAddress().getId())) {
                                 throw new AddressAlreadyUsedException("Postal address duplicated in import");
                             }
                         }
@@ -130,15 +147,31 @@ public class OrganizationService {
 
             historyDTO.setStatus(Status.SUCCESS);
             historyDTO.setImportedCount(importedCount);
-            importHistoryService.add(historyDTO);
+            historyDTO = importHistoryService.add(historyDTO);
 
-            return entities.stream().map(entityMapper::toDTO).toList();
         } catch (Exception e) {
             historyDTO.setStatus(Status.FAILED);
             historyDTO.setImportedCount(0);
             importHistoryService.add(historyDTO);
-            throw new ImportParseException("Import error: " + e.getMessage(), e);
+            throw new ImportDatabaseException("Failed to save entities or import history. " + e.getMessage(), e);
         }
+
+        try {
+            InputStream forMinio =
+                    new ByteArrayInputStream(cleanJson.getBytes(StandardCharsets.UTF_8));
+
+            minioService.uploadFile(forMinio, "import_" + historyDTO.getId().toString());
+
+        } catch (Exception e) {
+            historyDTO.setStatus(Status.FAILED);
+            historyDTO.setImportedCount(0);
+            importHistoryService.update(historyDTO);
+            throw new ImportFileStorageException("Failed to upload file to MinIO. " + e.getMessage(), e);
+        }
+
+        return entities.stream()
+                .map(entityMapper::toDTO)
+                .toList();
     }
 
 

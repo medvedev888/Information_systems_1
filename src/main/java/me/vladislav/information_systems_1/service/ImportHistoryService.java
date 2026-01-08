@@ -6,6 +6,7 @@ import jakarta.transaction.Transactional;
 import me.vladislav.information_systems_1.cache.LogCacheStats;
 import me.vladislav.information_systems_1.dto.ImportHistoryDTO;
 import me.vladislav.information_systems_1.dto.PageResponse;
+import me.vladislav.information_systems_1.exception.ImportHistoryNotFoundException;
 import me.vladislav.information_systems_1.mapper.EntityMapper;
 import me.vladislav.information_systems_1.model.ImportHistory;
 import me.vladislav.information_systems_1.model.User;
@@ -48,7 +49,7 @@ public class ImportHistoryService {
     }
 
     @Transactional(REQUIRES_NEW)
-    public ImportHistory add(ImportHistoryDTO dto) {
+    public ImportHistoryDTO add(ImportHistoryDTO dto) {
         User user = userRepository.getByLogin(dto.getLogin())
                 .orElseThrow(() -> new RuntimeException("User not found: " + dto.getLogin()));
 
@@ -57,8 +58,23 @@ public class ImportHistoryService {
         history.setStatus(dto.getStatus());
         history.setImportedCount(dto.getImportedCount());
 
-        importHistoryRepository.save(history);
-        return history;
+        history = importHistoryRepository.save(history);
+        return entityMapper.toDTO(history);
+    }
+
+    @Transactional(REQUIRES_NEW)
+    public void update(ImportHistoryDTO dto) {
+        ImportHistory importHistory = importHistoryRepository.getById(dto.getId())
+                .orElseThrow(() -> new ImportHistoryNotFoundException("Import history not found"));
+
+        if (dto.getStatus() != null) {
+            importHistory.setStatus(dto.getStatus());
+        }
+
+        if (dto.getImportedCount() != null) {
+            importHistory.setImportedCount(dto.getImportedCount());
+        }
+
     }
 
 }

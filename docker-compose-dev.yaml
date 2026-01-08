@@ -1,0 +1,19 @@
+version: "3.9"
+
+services:
+  minio:
+    image: quay.io/minio/minio
+    container_name: is-lab3-minio
+    command: server /data --console-address ":9001"
+    volumes:
+      - is_lab3_minio_data:/data
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    ports:
+      - "9002:9000" # S3 API
+      - "9003:9001" # Web UI
+    restart: always
+
+volumes:
+  is_lab3_minio_data:

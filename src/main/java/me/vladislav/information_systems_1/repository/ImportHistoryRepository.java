@@ -4,10 +4,10 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import me.vladislav.information_systems_1.model.ImportHistory;
-import me.vladislav.information_systems_1.model.Organization;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @ApplicationScoped
 public class ImportHistoryRepository {
@@ -92,8 +92,13 @@ public class ImportHistoryRepository {
         return query.getSingleResult();
     }
 
-    public void save(ImportHistory importHistory) {
+    public ImportHistory save(ImportHistory importHistory) {
         entityManager.persist(importHistory);
+        return importHistory;
+    }
+
+    public Optional<ImportHistory> getById(Long id) {
+        return Optional.ofNullable(entityManager.find(ImportHistory.class, id));
     }
 
 }

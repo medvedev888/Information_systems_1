@@ -51,6 +51,16 @@ public class GlobalExceptionHandler implements ExceptionMapper<RuntimeException>
                     .build();
         }
 
+        if (exception instanceof MinioInitializationException
+                || exception instanceof MinioUploadFileException
+                || exception instanceof ImportDatabaseException
+                || exception instanceof ImportFileStorageException
+        ) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(Map.of("success", false, "message", exception.getMessage()))
+                    .build();
+        }
+
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                 .entity(Map.of("success", false, "message", "Unexpected error"))
                 .build();
