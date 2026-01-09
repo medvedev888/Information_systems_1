@@ -1,11 +1,9 @@
 package me.vladislav.information_systems_1.service;
 
-import io.minio.BucketExistsArgs;
-import io.minio.MakeBucketArgs;
-import io.minio.MinioClient;
-import io.minio.PutObjectArgs;
+import io.minio.*;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
+import me.vladislav.information_systems_1.exception.MinioDownloadException;
 import me.vladislav.information_systems_1.exception.MinioInitializationException;
 import me.vladislav.information_systems_1.exception.MinioUploadFileException;
 
@@ -49,6 +47,19 @@ public class MinioService {
             );
         } catch (Exception e) {
             throw new MinioUploadFileException("File upload error", e);
+        }
+    }
+
+    public InputStream download(String fileName) {
+        try {
+            return minioClient.getObject(
+                    GetObjectArgs.builder()
+                            .bucket(BUCKET)
+                            .object(fileName)
+                            .build()
+            );
+        } catch (Exception e) {
+            throw new MinioDownloadException("Failed to download file: " + fileName, e);
         }
     }
 
