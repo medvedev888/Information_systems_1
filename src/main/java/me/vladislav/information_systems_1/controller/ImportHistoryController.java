@@ -11,6 +11,8 @@ import me.vladislav.information_systems_1.dto.ImportHistoryDTO;
 import me.vladislav.information_systems_1.dto.PageResponse;
 import me.vladislav.information_systems_1.service.ImportHistoryService;
 
+import java.io.InputStream;
+
 
 @Path("/imports")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -46,4 +48,20 @@ public class ImportHistoryController {
         }
         return Response.ok(response).build();
     }
+
+    @GET
+    @Path("/{id}/file")
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    public Response downloadImportFile(@PathParam("id") Long importId) {
+
+        InputStream stream = importHistoryService.downloadImportFile(importId);
+
+        return Response.ok(stream)
+                .header(
+                        "Content-Disposition",
+                        "attachment; filename=\"import_" + importId + ".txt\""
+                )
+                .build();
+    }
+
 }

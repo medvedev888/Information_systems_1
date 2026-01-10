@@ -3,6 +3,7 @@ package me.vladislav.information_systems_1.service;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import me.vladislav.information_systems_1.cache.LogCacheStats;
 import me.vladislav.information_systems_1.dto.AddressDTO;
 import me.vladislav.information_systems_1.dto.LocationDTO;
 import me.vladislav.information_systems_1.dto.PageResponse;
@@ -18,6 +19,7 @@ import me.vladislav.information_systems_1.repository.LocationRepository;
 import java.util.List;
 
 @ApplicationScoped
+@LogCacheStats
 public class AddressService {
     @Inject
     private AddressRepository addressRepository;
