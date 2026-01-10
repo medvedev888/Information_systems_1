@@ -3,12 +3,14 @@
 import Table from "@/components/table.vue";
 import Pagination from "@/components/pagination.vue";
 import Header from "@/components/header.vue";
-import {onBeforeUnmount, onMounted, reactive, ref, watch} from "vue";
+import {markRaw, onBeforeUnmount, onMounted, reactive, ref, watch} from "vue";
 import {showErrorFromResponse} from "@/utils/error.js";
+import {saveAs} from 'file-saver';
 import Input from "@/components/input.vue";
 import Button from "@/components/button.vue";
 import Select from "@/components/select.vue";
 import axios from "@/axios.js";
+import DownloadIcon from "@/assets/downloadIcon.svg";
 
 const page = ref(1);
 const totalPages = ref(1);
@@ -17,7 +19,8 @@ const columns = [
   {key: "id", label: "ID"},
   {key: "status", label: "Status"},
   {key: "login", label: "User"},
-  {key: "importedCount", label: "Count"}
+  {key: "importedCount", label: "Count"},
+  {key: "operations", label: "Operations"}
 ];
 let eventSource = null; // для SSE
 const filterField = ref(null);
@@ -35,6 +38,21 @@ const fieldLabels = {
   login: "User",
   importedCount: "Count"
 };
+
+// ----------------- CRUD -----------------
+
+async function downloadImportFile(importId) {
+  try {
+    const response = await axios.get(`/imports/${importId}/file`, {
+      responseType: 'blob'
+    });
+
+    saveAs(response.data, `import_${importId}.txt`);
+
+  } catch (err) {
+    showErrorFromResponse(err, errorModal, fieldLabels);
+  }
+}
 
 // ----------------- Fetch -----------------
 async function fetchImportHistory() {
@@ -56,8 +74,17 @@ async function fetchImportHistory() {
     const res = await axios.get(`/imports?${params.toString()}`);
     const imports = res.data.data || [];
 
+    imports.forEach(row => {
+      if (row.status === "SUCCESS") {
+        row.operations = [
+          {type: "Download", icon: markRaw(DownloadIcon), onClick: () => downloadImportFile(row.id)}
+        ];
+      }
+    });
+
     rows.splice(0, rows.length, ...imports);
     totalPages.value = res.data.totalPages ?? 1;
+
   } catch (err) {
     showErrorFromResponse(err, errorModal, fieldLabels);
   }
