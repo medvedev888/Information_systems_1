@@ -51,12 +51,11 @@ public class ImportHistoryController {
 
     @GET
     @Path("/{id}/file")
-    @Produces(MediaType.APPLICATION_OCTET_STREAM)
     public Response downloadImportFile(@PathParam("id") Long importId) {
 
         InputStream stream = importHistoryService.downloadImportFile(importId);
 
-        return Response.ok(stream)
+        return Response.ok(stream, MediaType.APPLICATION_OCTET_STREAM)
                 .header(
                         "Content-Disposition",
                         "attachment; filename=\"import_" + importId + ".txt\""

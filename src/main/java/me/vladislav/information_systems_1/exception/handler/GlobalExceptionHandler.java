@@ -11,7 +11,8 @@ import java.util.Map;
 public class GlobalExceptionHandler implements ExceptionMapper<RuntimeException> {
 
     @Override
-    public Response toResponse(RuntimeException exception) {
+    public Response toResponse(RuntimeException runtimeException) {
+        Throwable exception = unwrap(runtimeException);
 
         if (exception instanceof RelatedEntityDeletionException
                 || exception instanceof IllegalArgumentException
@@ -64,7 +65,16 @@ public class GlobalExceptionHandler implements ExceptionMapper<RuntimeException>
         }
 
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                .entity(Map.of("success", false, "message", "Unexpected error. " + exception.getMessage()))
+                .entity(Map.of("success", false, "message", "Unexpected error"))
                 .build();
+    }
+
+    private Throwable unwrap(Throwable t) {
+        Throwable result = t;
+        while (result.getCause() != null &&
+                !(result instanceof MinioInitializationException)) {
+            result = result.getCause();
+        }
+        return result;
     }
 }
