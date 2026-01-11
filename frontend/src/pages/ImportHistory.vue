@@ -11,6 +11,7 @@ import Button from "@/components/button.vue";
 import Select from "@/components/select.vue";
 import axios from "@/axios.js";
 import DownloadIcon from "@/assets/downloadIcon.svg";
+import ErrorModal from "@/components/error-modal.vue";
 
 const page = ref(1);
 const totalPages = ref(1);
@@ -40,19 +41,28 @@ const fieldLabels = {
 };
 
 // ----------------- CRUD -----------------
-
 async function downloadImportFile(importId) {
   try {
-    const response = await axios.get(`/imports/${importId}/file`, {
-      responseType: 'blob'
-    });
+    const response = await axios.get(`/imports/${importId}/file`, {responseType: 'blob'});
 
     saveAs(response.data, `import_${importId}.txt`);
-
   } catch (err) {
+    if (err.response && err.response.data) {
+      try {
+        const text = await err.response.data.text();
+        const data = JSON.parse(text);
+        showErrorFromResponse({response: {data}}, errorModal, fieldLabels);
+        return;
+      } catch (parseEx) {
+        showErrorFromResponse(err, errorModal, fieldLabels);
+        return;
+      }
+    }
+
     showErrorFromResponse(err, errorModal, fieldLabels);
   }
 }
+
 
 // ----------------- Fetch -----------------
 async function fetchImportHistory() {
@@ -149,6 +159,10 @@ watch(page, fetchImportHistory);
     </div>
     <Pagination v-model:pageNumber="page" :totalPages="totalPages"/>
   </div>
+
+
+  <!--  Error Modal  -->
+  <ErrorModal ref="errorModal"/>
 
 </template>
 
